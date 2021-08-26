@@ -1,0 +1,77 @@
+---
+
+- name: Первоначальная настройка CentOS
+  hosts: "{{ w_host | default('test') }}"
+
+  vars:
+    install_repos:
+      - epel-release
+    install_soft:
+      - wget
+      - libselinux
+      - libselinux-utils
+      - mc
+      - git
+      - nmap
+      - traceroute
+      - tcpdump
+      - bind-utils
+      - net-tools
+      - cpan
+      - ipset
+      - conntrack
+      - iptables
+      - iptables-services
+      - htop
+      - nmon
+      - atop
+      - tree
+      - psmisc
+      - ncdu
+      - ipset-service
+      - nfs-utils
+    remove_soft:
+      - firewalld
+
+  tasks:
+    - block:
+      - name: Install repos Centos
+        yum: name="{{ install_repos }}" state=present update_cache=yes
+        #with_items: "{{ install_repos }}"
+
+      - name: upgrade all packages
+        yum:
+          name: '*'
+          state: latest
+
+      - name: Install soft Centos
+        yum: name="{{ install_soft }}" state=present
+
+      - name: Remove soft Centos
+        yum: name="{{ remove_soft }}" state=absent
+
+- name: install ntp
+  include: ntp-client.yml
+  # import_playbook: ntp-client.yml
+  when: ansible_distribution == 'CentOS' and ansible_distribution_major_version < "8"
+  
+- name: install ntp Centos 8
+  include: centos8-ntp.yml
+  # import_playbook: ntp-client.yml
+  when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == "8"
+
+- name: ssh root only key
+  include: ssh-root-key-only.yml
+
+#- name: IPTABLES settings
+#  include: iptables.yml
+
+#- name: nastroka sudoers
+#  include: sudoers-users.yml
+
+#- name: install zabbix-agent
+#  include: zabbix-agent.yml
+
+
+
+
