@@ -1,0 +1,214 @@
+---
+
+- name: Install and configure zabbix-client default
+  hosts: "{{ w_host | default('test') }}"
+  
+  # become: true # если истина, то выполнятся все операции от имени root, вместо sudo
+
+  vars:
+    zabbix_agent: zabbix-agent
+    zabbix_agent_service: zabbix-agent
+    zabbix_agent_conf: /etc/zabbix/zabbix_agentd.conf
+    zabbix_server: "192.168.1.78"
+
+  tasks:
+    - name: "Adding zabbix group"
+      group:
+        name: zabbix
+        state: present
+      become: yes
+  
+    - name: "Adding zabbix user"
+      user:
+        name: zabbix
+        group: zabbix
+        state: present
+        create_home: False
+        home: /etc/zabbix
+        system: True
+      become: yes
+
+    - name: Repo zabbix for Centos 7
+      yum:
+        name: https://repo.zabbix.com/zabbix/4.0/rhel/7/x86_64/zabbix-release-4.0-1.el7.noarch.rpm
+        state: present
+      # when: ansible_pkg_mgr == 'yum'
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == "7"
+
+#    - name: GPG key zabbix for Centos 8
+#      rpm_key:
+#        state: present
+#        key: https://repo.zabbix.com/zabbix-official-repo.key
+#      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == "8"
+
+    - name: Repo zabbix for Centos 8
+      yum:
+        name: https://repo.zabbix.com/zabbix/4.0/rhel/8/x86_64/zabbix-release-4.0-2.el8.noarch.rpm
+        #name: https://repo.zabbix.com/zabbix/4.5/rhel/8/x86_64/zabbix-release-4.5-2.el8.noarch.rpm
+        state: present
+        disable_gpg_check: yes
+      # when: ansible_pkg_mgr == 'yum'
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == "8"
+
+    - name: Repo zabbix for Centos 6
+      yum:
+        name: https://repo.zabbix.com/zabbix/4.0/rhel/6/x86_64/zabbix-release-4.0-1.el6.noarch.rpm
+        state: present
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == "6"
+
+    - name: Repo zabbix for Ubuntu 16.04
+      apt:
+        name: http://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3%2Bxenial_all.deb
+        state: present
+      when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == "16.04"
+
+    - name: Repo zabbix for Ubuntu 18.04
+      # apt: 
+        # name: http://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3%2Bbionic_all.deb
+        # state: present
+      command: /usr/bin/wget http://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3%2Bbionic_all.deb
+      command: /usr/bin/dpkg -i zabbix-release_4.0-3+bionic_all.deb 
+      command: /usr/bin/apt update
+      when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == "18.04"
+
+    - name: Repo zabbix for Debian 9
+      apt:
+        name: https://repo.zabbix.com/zabbix/4.0/debian/pool/main/z/zabbix-release/zabbix-release_4.0-2+stretch_all.deb
+        state: present
+      when: ansible_distribution == 'Debian' and ansible_distribution_major_version == "9"
+
+    - name: Install zabbix-agent Centos
+      yum: name=zabbix-agent # state=latest
+      when: ansible_distribution == 'CentOS'
+
+    - name: Install zabbix-agent Ubuntu
+      apt: name=zabbix-agent # state=lastest
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Install zabbix-agent Debian
+      apt: name=zabbix-agent # state=lastest
+      when: ansible_distribution == 'Debian'
+
+    - name: Creates directory etc for zabbix
+      file:
+        path: /etc/zabbix/zabbix_agent.conf.d
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+        recurse: yes
+
+    - name: Creates directory scripts for zabbix
+      file:
+        path: /etc/zabbix/scripts
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Creates directory log for zabbix
+      file:
+        path: /var/log/zabbix
+        state: directory
+        owner: zabbix
+        group: zabbix
+        mode: 0755
+
+    - name: Creates directory run for zabbix
+      file:
+        path: /var/run/zabbix
+        state: directory
+        owner: zabbix
+        group: zabbix
+        mode: 0755
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^LogFileSize=0'
+        line: 'LogFileSize=256'
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^LogFile=.*$'
+        line: 'LogFile=/var/log/zabbix/zabbix_agentd.log'
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^PidFile=.*$'
+        line: 'PidFile=/var/run/zabbix/zabbix_agentd.pid'
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^# EnableRemoteCommands=0'
+        line: 'EnableRemoteCommands=1'
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^# ListenIP=*$'
+        line: 'ListenIP={{ ansible_ssh_host }}'
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^# SourceIP=*$'
+        line: 'SourceIP={{ ansible_ssh_host }}'
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^Server=127.0.0.1'
+        line: 'Server={{ zabbix_server }}'
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^ServerActive=127.0.0.1'
+        line: 'ServerActive={{ zabbix_server }}'
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^Hostname=Zabbix server'
+        line: 'Hostname={{ ansible_hostname }}'
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^# Timeout=3'
+        line: 'Timeout=30'
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^# BufferSend=5'
+        line: 'BufferSize=100'
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^# MaxLinesPerSecond=20'
+        line: 'MaxLinesPerSecond=100'
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^# HostMetadata='
+        line: 'HostMetadata=Linux yJrTyy2fUxXbeuSJMiSb9baHVmo69kZiLJU5t8PQetUNDE9cDo3E555'
+
+    - lineinfile:
+        path: '{{ zabbix_agent_conf }}'
+        regexp: '^Include=/etc/zabbix.*$'
+        line: 'Include=/etc/zabbix/zabbix_agent.conf.d'
+
+    - name: Copy config file
+      copy: src=files/zabbix/zabbix_agent.conf.d/userparameter_diskstats.conf dest=/etc/zabbix/zabbix_agent.conf.d/userparameter_diskstats.conf mode=0644
+
+    - name: Copy scripts file
+      copy: src=files/zabbix/scripts/disk_perf.sh dest=/etc/zabbix/scripts/disk_perf.sh mode=0755
+
+    - name: Copy scripts file
+      copy: src=files/zabbix/scripts/lld-disks.py dest=/etc/zabbix/scripts/lld-disks.py mode=0755
+
+    - name: Starting the Zabbix Agent
+      service: name='{{ zabbix_agent_service }}' state=restarted enabled=yes
+
+    - name: add in sudoers
+      lineinfile:
+        dest: /etc/sudoers
+        regexp: '^###$'
+        line: 'zabbix ALL=(ALL) NOPASSWD: /etc/zabbix/scripts/*'
+        insertafter: EOF
+        backup: yes
+      
