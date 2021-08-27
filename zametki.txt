@@ -1,0 +1,7 @@
+цикл выполнения
+  - name: loop until example
+    shell: echo -n Z >> myfile.txt && cat myfile.txt  # команда
+    register: output                                  # вывод в переменную
+    delay: 2                                          # задержка в сек
+    retries: 10                                       # число повторов
+    until: output.stdout.find("ZZZZ") == false        # условие до 
