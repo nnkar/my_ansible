@@ -1,0 +1,13 @@
+---
+
+- name:  настройка ntp CentOS
+  hosts: "{{ w_host | default('test') }}"
+
+  tasks:
+    - block:
+      - name: update all soft Centos
+        yum: name=* state=latest
+
+
+
+
