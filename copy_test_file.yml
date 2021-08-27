@@ -1,0 +1,23 @@
+---
+
+- name: copy file test.txt to server
+  hosts: "{{ w_host | default('test') }}"
+  become: yes
+
+  vars:
+    source_file: files/test.txt
+    dest_file: /tmp/test.txt
+
+  tasks:
+  - name: Copy file
+    copy: src='{{ source_file }}' dst='{{ dest_file }}' mode=755
+
+
+  - debug:
+      var:  source_file
+  
+  - shell: uptime
+    register: results
+  
+  - debug:
+      var: results

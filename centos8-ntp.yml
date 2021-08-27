@@ -1,0 +1,34 @@
+---
+
+- name:  настройка ntp CentOS
+  hosts: "{{ w_host | default('test') }}"
+
+  vars:
+    install_soft:
+      - chrony
+    ntp_conf: /etc/chrony.conf
+    ntp_service: chronyd
+
+  tasks:
+    - block:
+      - name: Install soft Centos
+        yum: name="{{ item }}" state=present
+        with_items: "{{ install_soft }}"
+      
+      - name: Ensure chrony is running.
+        service:
+          name: chronyd
+          state: started
+          enabled: yes
+
+      - lineinfile:
+          path: '{{ ntp_conf }}'
+          regexp: '^pool'
+          line: 'server 192.168.222.252'
+    
+      - name: restart ntp
+        service: name='{{ ntp_service }}' state=restarted enabled=yes
+
+
+
+

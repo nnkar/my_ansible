@@ -1,0 +1,38 @@
+---
+  # Синхронизация ipset цепочки sshban - чёрный список
+- name: ipset sync
+  hosts: "{{ w_host | default('test') }}"
+
+  vars:
+    ip_host: '{{ ansible_default_ipv4.address }}'
+    ssh_port: '{{ ansible_ssh_port }}'
+    remote_file: /etc/ipset/ipset
+    remote_file2: /etc/ipset
+    remote_file_tmp: /tmp/ipset
+
+  tasks:
+    - name: Copy file ipset Centos
+      local_action: command /bin/scp -q -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -P '{{ ssh_port }}' '{{ ip_host }}':/etc/ipset/ipset /opt/ansible/files/ipset-sync/ipset-tmp
+      when: ansible_pkg_mgr == 'yum'
+
+    - name: Copy file ipset Ubuntu Debian
+      local_action: command /bin/scp -q -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -P '{{ ssh_port }}' '{{ ip_host }}':/etc/ipset /opt/ansible/files/ipset-sync/ipset-tmp
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: local script
+      local_action: command /bin/bash /opt/ansible/files/ipset-sync/ipsetscript.sh
+
+    - name: Копирование файдла на хост
+      copy: src=files/ipset-sync/ipset dest='{{remote_file_tmp}}' mode=0640
+
+    - name: Копирование файдла sshban на хост
+      copy: src=files/ipset-sync/sshban_ip dest=/scripts/iptables/list_files/sshban_ip mode=0640
+
+    - name: Копирование файдла ipset-restore.sh на хост
+      copy: src=files/ipset-sync/ipset-restore.sh dest=/scripts/iptables/ipset-restore.sh mode=0750
+
+    - name: Обновление ipset sshban
+      # command: 'ipset restore -f /etc/ipset/ipset'
+      # command: 'ipset restore \< /etc/ipset/ipset'
+      command: '/bin/bash /scripts/iptables/ipset-restore.sh'
+

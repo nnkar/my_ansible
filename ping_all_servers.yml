@@ -1,0 +1,15 @@
+---
+
+- name: Test ping all servers
+  hosts: "{{ w_host | default('all') }}"
+  become: yes
+
+  tasks:
+  - name: Ping servers
+    ping:
+
+  - shell: uptime
+    register: results
+  
+  - debug:
+      var: results

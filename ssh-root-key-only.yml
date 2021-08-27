@@ -1,0 +1,35 @@
+---
+
+- name: SSH root without-password
+  hosts: "{{ w_host | default('test') }}"
+  
+  vars:
+    file_conf: /etc/ssh/sshd_config
+    lineModified: PermitRootLogin without-password
+
+  tasks:
+    - name: seach line
+      shell: grep "PermitRootLogin" '{{ file_conf }}'
+      register: test_grep
+
+    - debug: msg="{{test_grep.stdout}}"
+
+    - name: Zamena stroki
+      lineinfile:
+        path: '{{ file_conf }}'
+        regexp: '^[#]?PermitRootLogin [YyNnPp].*$'
+        line: '{{ lineModified }}'
+        backrefs: yes
+      register: akey
+
+    - block:
+      - name: Restarting the sshd
+        service: name=sshd state=restarted
+        when: ansible_pkg_mgr == 'yum'
+
+      - name: Restarting the ssh Ubuntu
+        service: name=ssh state=restarted
+        when: ansible_pkg_mgr == 'apt'
+      when: akey.changed
+
+

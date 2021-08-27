@@ -1,0 +1,15 @@
+---
+
+- name: update Ubuntu
+  hosts: "{{ w_host | default('test') }}"
+
+  tasks:
+    - name: update ubuntu
+      command: /usr/bin/apt update
+
+    - name: update all soft Ubuntu
+      yum: name=* state=latest
+
+
+
+
