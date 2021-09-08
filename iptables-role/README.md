@@ -20,7 +20,7 @@ ansible-playbook iptables-role.yml -e w_host=hostname
 
 - name: iptables setting
   hosts: "{{ w_host | default('test') }}" \
-  roles: \
+  roles: 
     - role: iptables-role}
 
 License
