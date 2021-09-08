@@ -1,0 +1,11 @@
+---
+
+- name: set timezone
+  host: "{{ w_host | default('test') }}"
+
+  vars:
+    timezone: "Europe/Samara"
+
+  tasks:
+    - name: sell comanda
+      shell: timedatectl set-timezone '{{ timezone }}'
