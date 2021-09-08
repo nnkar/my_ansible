@@ -6,9 +6,13 @@ Role install iptables
 Role Variables
 --------------
 rezerv1_ip_host, rezerv2_ip_host - ип для которых открыто ssh
+
 open_ports_tcp - порты для открытия сразу
+
 inet_ip_host - внешний ип
+
 inet_if_host - внешний интерфейс
+
 
 Example Playbook
 ------------
