@@ -202,7 +202,7 @@ echo "ochistka end"
 
 # Block all IPv6 traffic
 # If the ip6tables command is available, try to block all IPv6 traffic.
-if test -x $IP6TABLES; then
+if ! test -z $IP6TABLES; then
 	# Set the default policies
 	# drop everything
 	$IP6TABLES -P INPUT DROP 2>/dev/null
@@ -485,7 +485,9 @@ echo "Конец формирования цепочек"
 #################################################################################################
 # Направляем весь входящий трафик в цепочку
 # из инета
-    #$IPT -A INPUT -d $INET_IP1 -j input_inet
+if ! test -z $INET_IP1; then
+    $IPT -A INPUT -d $INET_IP1 -j input_inet
+fi
 # из локалки
     $IPT -A INPUT -d $LAN_IP1 -j input_lan
 # по умолчанию
@@ -498,7 +500,9 @@ echo "END правил INPUT"
 $IPT -A OUTPUT -j statefull
 $IPT -A OUTPUT -o $LO_IF -j ACCEPT
 $IPT -A OUTPUT -o $LAN_IF1 -j ACCEPT
-#$IPT -A OUTPUT -o $INET_IF1 -j ACCEPT
+if ! test -z $INET_IF1; then
+    $IPT -A OUTPUT -o $INET_IF1 -j ACCEPT
+fi
 $IPT -A OUTPUT -j REJECTLOG
 
 echo "END правил OUTPUT"
