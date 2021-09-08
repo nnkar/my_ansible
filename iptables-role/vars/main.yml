@@ -1,0 +1,25 @@
+---
+# vars file for role-iptables
+lan_ip_host     : '{{ ansible_default_ipv4.address }}'
+lan_if_host     : '{{ ansible_default_ipv4.interface }}'
+mac_host        : '{{ ansible_default_ipv4.macaddress }}'
+rezerv1_ip_host : '192.168.1.65'
+rezerv2_ip_host : '192.168.1.66'
+inet_ip_host    : ''
+inet_if_host    : ''
+open_ports_tcp  : ''
+open_ports_udp  : ''
+remove_soft:
+  - firewalld
+install_soft_centos:
+  - iptables
+  - iptables-services
+  - ipset-service
+  - ipset
+install_soft_ubuntu:
+  - iptables
+  - iptables-persistent
+  - ipset
+  - ipset-persistent
+  - netfilter-persistent
+  

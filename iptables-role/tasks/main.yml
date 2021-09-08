@@ -1,0 +1,114 @@
+---
+# tasks file for role-iptables
+- import_tasks: centos.yml
+  when: ansible_distribution == "CentOS"
+
+- import_tasks: ubuntu.yml
+  when: ansible_distribution == "Ubuntu"
+
+- name: restart rsyslog
+  service: 
+    name: rsyslog 
+    state: restarted
+
+- name: Creates in etc iptables
+  file:
+    path: /etc/iptables
+    state: directory
+    owner: root
+    group: root
+    mode: 0750
+
+- name: Creates in etc ipset
+  file:
+    path: /etc/ipset
+    state: directory
+    owner: root
+    group: root
+    mode: 0750
+
+- name: Creates directory scripts
+  file:
+    path: /scripts
+    state: directory
+    owner: root
+    group: root
+    mode: 0750
+
+- name: Creates directory iptables
+  file:
+    path: /scripts/iptables
+    state: directory
+    owner: root
+    group: root
+    mode: 0750
+
+- name: Creates directory list_files
+  file:
+    path: /scripts/iptables/list_files
+    state: directory
+    owner: root
+    group: root
+    mode: 0750
+
+- name: Creates log iptables
+  file:
+    path: /var/log/iptables
+    state: directory
+    owner: root
+    group: root
+    mode: 0750
+
+- name: Copy firewall.sh
+  template:
+    src: firewall.sh.j2 
+    dest: /scripts/iptables/firewall.sh
+    owner: root
+    group: root
+    mode: 0750
+
+- name: Copy config file 2
+  copy: 
+    src: ipset.sh
+    dest: /scripts/iptables/ipset.sh
+    mode: 0750
+
+- name: Copy config file 3
+  copy: 
+    src: clear-ipt.sh 
+    dest: /scripts/iptables/clear-ipt.sh 
+    mode: 0750
+
+- name: start iptables script ochistka
+  shell: /bin/bash /scripts/iptables/clear-ipt.sh
+
+- name: Copy config file 4
+  copy: 
+    src: allow_ip 
+    dest: /scripts/iptables/list_files/allow_ip 
+    mode: 0640
+
+- name: Copy config file 5
+  copy: 
+    src: deny_ip 
+    dest: /scripts/iptables/list_files/deny_ip 
+    mode: 0640
+
+- name: Copy config file 6
+  copy: 
+    src: sshban_ip 
+    dest: /scripts/iptables/list_files/sshban_ip 
+    mode: 0640
+
+- name: Copy config file 7
+  copy: 
+    src: iptables-logrotate
+    dest: /etc/logrotate.d/iptables
+    mode: 0640
+
+- name: Add a line to crontab
+  lineinfile:
+    path: /etc/crontab
+    line: '10 */2  *  *  * root    /scripts/iptables/ipset.sh'
+    create: yes
+

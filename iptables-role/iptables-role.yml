@@ -1,0 +1,6 @@
+---
+
+- name: iptables setting
+  hosts: "{{ w_host | default('test') }}"
+  roles:
+    - role: iptables-role

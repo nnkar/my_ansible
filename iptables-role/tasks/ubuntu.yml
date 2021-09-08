@@ -1,0 +1,42 @@
+---
+- name: update ubuntu
+  command: /usr/bin/apt update
+
+- name: upgrade all packages
+  apt:
+    name: '*'
+    state: latest  
+
+- name: Install soft ubuntu
+  apt: 
+    name: '{{ install_soft_ubuntu }}' 
+    state: present
+
+- name: Remove soft ubuntu
+  apt: 
+    name: '{{ remove_soft }}'
+    state: absent
+
+- name: Starting and enabled iptables
+  service: 
+    name: iptables 
+    state: started 
+    enabled: yes
+
+- name: Starting and enabled ipset
+  service: 
+    name: ipset 
+    state: started 
+    enabled: yes
+
+- name: Starting and enabled netfilter-persistent
+  service: 
+    name: netfilter-persistent 
+    state: started 
+    enabled: yes
+
+- name: Copy 90-iptables.conf Ubuntu
+  copy: 
+    src: 90-iptables.conf
+    dest: /etc/rsyslog.d/90-iptables.conf
+    mode: 0640   
