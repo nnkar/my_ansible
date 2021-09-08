@@ -1,7 +1,9 @@
 Role install iptables
 =========
 
-Удаляет firewalld и устанавливает iptables и ipset
+Удаляет firewalld и устанавливает iptables и ipset.
+Для Ubuntu и CentOS
+
 
 Role Variables
 --------------
