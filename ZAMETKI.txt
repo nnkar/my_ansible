@@ -9,3 +9,38 @@
   - name: Print
     debug:
       var: output.stdout
+
+- hosts: experiments
+  roles:
+   – common
+   – {role: web, dir: '/var/www', port: 80}
+   – {role: repository, when: "ansible_os_family =='RedHat'"
+   
+   
+   
+   tasks:
+    - apt: name={{ item }} state=installed
+      with_items:
+         - httpd
+         - htop
+      tags:
+         - packages
+
+    - template: src=templates/src.j2 dest=/var/www/.htaccess
+      tags:
+         - configuration
+---
+- hosts: experiments
+  roles:
+    - { role: web, tags: ["apache", "simple"] }
+
+---
+- hosts: experiments
+  pre_tasks:
+    - shell: echo 'hello, habr'
+  roles:
+    - { role: web }
+  tasks:
+    - shell: echo 'still busy'
+  post_tasks:
+    - shell: echo 'goodbye, habr'
