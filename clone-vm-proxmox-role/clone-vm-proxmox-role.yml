@@ -1,0 +1,6 @@
+---
+# ansible-playbook clone-vm-proxmox-role.yml -e w_host=node_1
+- name: clone vm 
+  hosts: "{{ w_host }}"
+  roles:
+    - role: clone-vm-proxmox-role

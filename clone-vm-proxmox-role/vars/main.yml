@@ -1,0 +1,23 @@
+---
+# vars file for clone-vm-proxmox-role
+vmname: unifi-controller
+vmclone: ubuntu-20-template-3
+pmx_node: node-1
+pmx_storage: storage-local
+
+pmx_api_host: node-1
+pmx_api_user: root@pam
+pmx_api_passwd: PASSWORD1
+
+vm_ciuser: root
+vm_cipassword: Passw0rd2
+
+vm_ip1: "192.168.2.27/24"
+vm_ssh_port: 22
+vm_ip2: "192.168.1.1/24"
+vm_ip3: "8.8.8.8/27"
+vm_gw: "8.8.8.1"
+
+vm_cores: 4
+vm_memory: 2048
+
