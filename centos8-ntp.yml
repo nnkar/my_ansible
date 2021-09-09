@@ -24,7 +24,7 @@
       - lineinfile:
           path: '{{ ntp_conf }}'
           regexp: '^pool'
-          line: 'server 192.168.222.252'
+          line: 'server 192.168.1.252'
     
       - name: restart ntp
         service: name='{{ ntp_service }}' state=restarted enabled=yes
