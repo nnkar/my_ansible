@@ -1,6 +1,6 @@
-Role NTP client for Ubuntu
+Role for Ubuntu
 =========
-
+Установка программ и небольшая настройка
 Role Variables
 --------------
 
