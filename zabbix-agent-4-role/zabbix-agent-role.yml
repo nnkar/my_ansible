@@ -1,0 +1,12 @@
+---
+
+- name: Install and configure zabbix-client 
+  hosts: "{{ w_host | default('test') }}"
+  roles:
+    - role: zabbix-agent-role
+
+
+
+
+
+

@@ -1,0 +1,16 @@
+---
+- name: Repo zabbix for Debian 9
+  apt:
+    name: https://repo.zabbix.com/zabbix/4.0/debian/pool/main/z/zabbix-release/zabbix-release_4.0-2+stretch_all.deb
+    state: present
+  when: ansible_distribution_major_version == "9"
+
+- name: Install zabbix-agent Debian
+  apt: 
+    name: zabbix-agent
+    # state=lastest
+
+
+
+
+

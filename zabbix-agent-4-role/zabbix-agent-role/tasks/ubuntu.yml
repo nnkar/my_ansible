@@ -1,0 +1,30 @@
+---
+- name: Repo zabbix for Ubuntu 16.04
+  apt:
+    name: http://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3%2Bxenial_all.deb
+    state: present
+  when: ansible_distribution_version == "16.04"
+
+- name: Repo zabbix for Ubuntu 18.04
+  #apt:
+    #name: http://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3%2Bbionic_all.deb
+    #state: present
+  shell: wget -O zabbix-release.deb http://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3%2Bbionic_all.deb;
+         dpkg -i zabbix-release.deb && apt update;
+  when: ansible_distribution_version == "18.04"
+
+- name: Repo zabbix for Ubuntu 20.04
+  #apt:
+    #name: http://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3%2Bfocal_all.deb
+    #state: present
+  shell: wget -O zabbix-release.deb http://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3%2Bfocal_all.deb;
+         dpkg -i zabbix-release.deb && apt update;
+  when: ansible_distribution_version == "20.04"
+
+- name: Install zabbix-agent Ubuntu
+  apt: 
+    name: zabbix-agent 
+    # state=lastest
+
+
+
