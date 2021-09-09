@@ -1,0 +1,90 @@
+---
+- name: Add unifi GPG apt Key
+  apt_key:
+    url: https://dl.ui.com/unifi/unifi-repo.gpg
+    state: present
+
+- name: Add mongodb GPG apt Key
+  apt_key:
+    url: https://www.mongodb.org/static/pgp/server-4.4.asc
+    state: present
+
+- name: Add mongodb Repository
+  apt_repository:
+    repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse"
+    state: present
+
+- name: Add unifi Repository
+  apt_repository:
+    repo: deb https://www.ui.com/downloads/unifi/debian stable ubiquiti
+    state: present
+
+- name: update ubuntu
+  shell: /usr/bin/apt update
+
+- name: update all soft Ubuntu
+  apt: 
+    name: "*" 
+    state: latest
+
+- name: Install soft
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+    - apt-transport-https
+    - ca-certificates
+    - openjdk-8-jre-headless
+    - unifi
+
+# не обязательно
+- name: upload unifi
+  get_url:
+    url: https://dl.ubnt.com/unifi/6.2.26/unifi_sysvinit_all.deb
+    dest: /root/unifi_sysvinit_all.deb
+
+- name: unifu is running Ubuntu
+  service: 
+    name: unifi 
+    state: started 
+    enabled: yes
+
+- name: mongodb is running Ubuntu
+  service: 
+    name: mongodb 
+    state: started 
+    enabled: yes
+
+# установка dhcp для тарелок
+- name: Install dhcp server Ubuntu
+  apt: 
+    name: isc-dhcp-server 
+    state: present
+
+- name: isc-dhcp-server is running Ubuntu
+  service: 
+    name: isc-dhcp-server 
+    state: started 
+    enabled: yes
+
+- name: copy config
+  template: 
+    src: dhcpd.conf.j2 
+    dest: /etc/dhcp/dhcpd.conf 
+    mode: 0640
+
+- name: copy config default
+  template: 
+    src: isc-dhcp-server-etc-default.j2
+    dest: /etc/default/isc-dhcp-server 
+    mode: 0640
+
+- name: restarting the dhcp server
+  service: 
+    name: isc-dhcp-server 
+    state: restarted 
+    enabled: yes
+
+

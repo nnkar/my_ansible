@@ -1,0 +1,6 @@
+---
+# ansible-playbook unifi-controller-role.yml -e w_host=unifi
+- name: install unifi controller
+  hosts: "{{ w_host }}"
+  roles:
+    - role: unifi-controller-role

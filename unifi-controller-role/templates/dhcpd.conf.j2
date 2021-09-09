@@ -1,0 +1,38 @@
+# dhcpd.conf
+# 
+# Configuration file for Wi-Fi in Aquamoll
+#
+
+option space ubnt;
+option ubnt.UniFi-address code 1 = IP-address;
+
+option domain-name '{{ unifi_domain }}';
+option domain-name-servers '{{ unifi_dns }}';
+
+default-lease-time 60;
+max-lease-time 600;
+
+authoritative;
+log-facility local7;
+
+class "ubnt" {
+  match if substring (option vendor-class-identifier, 0, 4) = "ubnt";
+  option vendor-class-identifier "ubnt";
+  vendor-option-space ubnt;
+}
+
+
+subnet '{{ unifi_subnet }}' netmask '{{ unifi_netmask }}' {
+  range '{{ unifi_range }}';
+  option routers '{{ unifi_routers }}';
+  option broadcast-address '{{ unifi_broadcast }}';
+}
+
+
+# Static AP Outdoor
+
+#host name_ap {
+#  hardware ethernet 00:27:00:00:00:bc;
+#  fixed-address 192.168.1.13;
+#}
+

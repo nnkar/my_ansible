@@ -1,0 +1,12 @@
+---
+# vars file for unifi-controller-role
+# fot dhcp server
+unifi_subnet: "192.168.1.0"
+unifi_netmask: "255.255.255.0"
+unifi_range: "192.168.1.2 192.168.1.254"
+unifi_routers: "192.168.1.1"
+unifi_broadcast: "192.168.1.255"
+unifi_dns: "8.8.8.8, 8.8.4.4"
+unifi_domain: "unifi.lan"
+
+unifi_dhcp_interface: "eth1"
