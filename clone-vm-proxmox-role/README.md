@@ -1,12 +1,11 @@
 Role clone-vm-proxmox-role
 =========
-
+Клонирование ВМ в proxmox для контроллера Unifi.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
+    ansible-playbook clone-vm-proxmox-role.yml -e w_host=node_1
     - name: clone-vm-proxmox-role
       hosts: "{{ w_host | default('test') }}"
       roles:
