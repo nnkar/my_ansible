@@ -1,0 +1,5 @@
+---
+# tasks file for ubuntu-role
+
+- import_tasks: ubuntu.yml
+  when: ansible_distribution == "Ubuntu"

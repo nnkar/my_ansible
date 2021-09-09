@@ -1,0 +1,34 @@
+---
+# vars file for ubuntu-role
+install_soft:
+      - wget
+      - curl
+      - libselinux
+      - libselinux-utils
+      - mc
+      - git
+      #- nmap
+      - traceroute
+      - tcpdump
+      - bind-utils
+      - net-tools
+      - cpan
+      - ipset
+      - ipset-persistent
+      - conntrack
+      - iptables
+      - iptables-persistent
+      - htop
+      - nmon
+      - atop
+      - tree
+      - psmisc
+      - ncdu
+      - nfs-utils
+remove_soft:
+      - firewalld
+file_conf: /etc/ssh/sshd_config
+lineModified: PermitRootLogin without-password
+region: Europe
+city: Samara
+ip_ntp_server: 192.168.1.1

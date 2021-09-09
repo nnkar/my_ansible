@@ -1,0 +1,6 @@
+---
+
+- name: ubuntu install default soft and first setting
+  hosts: "{{ w_host | default('test') }}"
+  roles:
+    - role: ubuntu-role

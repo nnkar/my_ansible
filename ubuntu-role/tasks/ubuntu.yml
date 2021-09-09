@@ -1,0 +1,25 @@
+---
+
+- name: update ubuntu
+  shell: /usr/bin/apt update
+
+- name: upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+
+- name: Install soft ubuntu
+  yum: 
+    name: '{{ install_soft }}' 
+    state: present
+
+- name: Remove soft ubuntu
+  yum: 
+    name: '{{ remove_soft }}' 
+    state: absent
+
+- name: install ntp
+  include: ntp-client.yml
+  
+- name: ssh root only key
+  include: ssh-root-key-only.yml
