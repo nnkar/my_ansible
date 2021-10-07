@@ -1,0 +1,70 @@
+---
+
+- name: Install snmp
+  hosts: "{{ w_host | default('test') }}"
+
+  vars:
+    install_soft:
+      - net-snmp
+      - net-snmp-utils
+    install_soft_ubuntu:
+      - snmp
+      - snmpd
+      - snmp-mibs-downloader
+    ip_cacti:
+      - 192.168.1.7
+
+  tasks:
+    - block:
+      - name: Install soft Centos
+        yum: name="{{ install_soft }}" state=present
+
+      - name: Enable snmpd service
+        service: name=snmpd state=started enabled=yes
+        notify: Restart snmpd
+
+      - name: Copy config
+        template:
+          src: templates/snmpd.conf.j2
+          dest: /etc/snmp/snmpd.conf
+          owner: root
+          group: root
+          mode: 0644
+          backup: yes
+        notify: Restart snmpd
+
+      - name: Open port firewall
+        firewalld:
+          rich_rule: rule family="ipv4" source address="1{{ ip_cacti }}/32" port port=161 protocol="udp" accept
+          zone: public
+          permanent: true
+          state: enabled
+
+      - name: firewalld reload
+        command: firewall-cmd --reload
+      when: ansible_distribution == 'CentOS'
+
+    - block:
+      - name: Install soft Ubuntu
+        apt: name="{{ install_soft_ubuntu }}" state=present
+
+      - name: Enable snmpd service
+        service: name=snmpd state=started enabled=yes
+        notify: Restart snmpd
+      
+      - name: Allow ufw port ACCEPT
+        community.general.ufw:
+          rule: allow
+          direction: in
+          proto: udp
+          src: "{{ ip_cacti }}"
+          dest: "{{ ansible_ssh_host }}"
+          to_port: '161'
+      when: ansible_distribution == 'Ubuntu'
+
+  handlers:
+  - name: Restart snmpd
+    action: service name=snmpd state=restarted
+
+
+
