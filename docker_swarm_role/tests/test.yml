@@ -2,4 +2,4 @@
 - hosts: localhost
   remote_user: root
   roles:
-    - docker_swarm_proxmox_role
+    - docker_swarm_role

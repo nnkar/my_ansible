@@ -1,0 +1,4 @@
+---
+# tasks file for docker_role
+
+- import_tasks: docker_install.yml

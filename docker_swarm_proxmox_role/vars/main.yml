@@ -1,19 +1,18 @@
 ---
 # vars file for docker_swarm_proxmox_role
-vmname: 
-  - dmaster1
-  - dmaster2
-  - dworker1
-  - dworker2
-vmclone: ubuntu-20-template-3
+vm_names: 
+  dmaster1:
+      vm_ip: 192.168.1.129
+  dmaster2:
+      vm_ip: 192.168.1.130
+  dworker1:
+      vm_ip: 192.168.1.131
+  dworker2:
+      vm_ip: 192.168.1.132
+
+vmclone: 'storage-local:vztmpl/ubuntu-20.04-standard_20.04-1_amd64.tar.gz'
 pmx_node: node-1
 pmx_storage: storage-local
-
-ipvm:
-  - 192.168.1.129
-  - 192.168.1.130
-  - 192.168.1.131
-  - 192.168.1.132
 
 pmx_api_host: node-1
 pmx_api_user: root@pam
@@ -22,11 +21,15 @@ pmx_api_passwd: PASSWORD1
 vm_ciuser: root
 vm_cipassword: Passw0rd2
 
-vm_ip1: "192.168.2.27/24"
 vm_ssh_port: 22
-vm_ip2: "192.168.1.1/24"
-vm_ip3: "8.8.8.8/27"
-vm_gw: "8.8.8.1"
+vm_gw: "192.168.1.1"
+vm_dns: "8.8.8.8"
+vm_domain_search: "evolife.local"
 
+vm_pubkey: 'ssh-rsa AAAAB3SNzaC1yc2EAAAADAQABAAABAQDWBid5FZ9GC9fZolu8Q27tqthOyujLr5clbLefp44zFE9aG8mndPFrDKqjn74H045S1W2MSyrgqXgwHJAgQnueSn/p2G8SBw76h/DHWvgwkt7fsZ8Bvu2gW6zNZ8yXOR8asdGvs0nUOzGj98gRyHYRJK4sn5NYJQwxCFgcxVyOU46CzrdXZB6WXZzRg330RrUGQFklK5zPp+l2ABIRwAhvFAGJz06ujCPXt+fpYKZQ4ygi0/uL9LsVuD+N1Avqtqpt2q6wLJIsqrPQJXZhpZzMUzey41HSPVnEQ9E5I16/RnShrCyJXLmAeaDDdHlP96Q3KEU1HH77v7eyLEY9O98XcH root@ansible'
 vm_cores: 4
 vm_memory: 2048
+vm_swap_size: 1024
+vm_hdd: 'storage-local:20'
+
+
