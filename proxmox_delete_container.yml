@@ -1,0 +1,19 @@
+---
+
+- name: delete container proxmox
+  hosts: "{{ w_host | default('test') }}"
+
+  vars:
+    vm_id_del:  '{{ vm_id}}'
+    pmx_api_host: node-1
+    pmx_api_user: root@pam
+    pmx_api_passwd: PASSWORD1
+
+  tasks:
+  - name: Remove container
+    community.general.proxmox:
+      vmid: '{{ vm_id_del }}'
+      api_user: '{{ pmx_api_user }}'
+      api_password: '{{ pmx_api_passwd }}'
+      api_host: '{{ pmx_api_host }}'
+      state: absent
