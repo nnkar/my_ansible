@@ -15,7 +15,7 @@
     password: '{{ vm_cipassword }}'
     hostname: '{{ item.key }}'
     ostemplate: '{{ vmclone }}'
-    netif: '{"net0":"name=eth0,gw={{ vm_gw }},ip={{ item.value.vm_ip }}/24,bridge=vmbr0"}'
+    netif: '{"net0":"name=eth0,gw={{ vm_gw }},ip={{ item.value.vm_ip }}/24,bridge={{ pmx_bridge }}"}'
     cores: '{{ vm_cores }}'
     memory: '{{vm_memory }}'
     disk: '{{ vm_hdd }}'
