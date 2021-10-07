@@ -1,0 +1,30 @@
+---
+- name: install pip pip3
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: no
+  vars:
+    packages:
+    - python-pip
+    - python3-pip 
+
+- name:  install proxmoxer pip
+  pip:
+    name: proxmoxer
+    executable: pip
+
+- name:  install requests pip
+  pip:
+    name: requests
+    executable: pip
+
+- name:  install proxmoxer pip3
+  pip:
+    name: proxmoxer
+    executable: pip3
+
+- name:  install requests pip3
+  pip:
+    name: requests
+    executable: pip3

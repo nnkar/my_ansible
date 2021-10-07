@@ -1,0 +1,20 @@
+---
+# ansible-playbook email_ip_ban.yml -e ipban=62.141.46.123
+- name: Add ip ban email server
+  hosts: email
+
+  vars:
+    ipban: '{{ ipban }}'
+
+  tasks:
+  - name: add ip to sshban ipset
+    shell: ipset -A sshban '{{ ipban }}'
+
+  - name:  result
+    shell: ipset -L sshban | grep '{{ ipban }}'
+    register: result
+
+  - debug: 
+      msg: 
+        - '{{ result }}'
+      

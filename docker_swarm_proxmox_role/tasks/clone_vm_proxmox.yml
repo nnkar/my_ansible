@@ -1,0 +1,63 @@
+---
+- name: get next id vm
+  shell:
+      vmid=$(pvesh get /cluster/nextid);
+      echo $vmid
+  register: idnewvm
+
+- name: Clone vm
+  community.general.proxmox_kvm:
+    node: '{{ pmx_node }}'
+    api_user: '{{ pmx_api_user }}'
+    api_password: '{{ pmx_api_passwd }}'
+    api_host: '{{ pmx_api_host }}'
+    clone: '{{ vmclone }}'
+    name: '{{ vmname }}'
+    full: yes
+    storage: '{{pmx_storage}}'
+    newid: '{{ idnewvm.stdout }}'
+    timeout: 600
+
+- name: update ip 0 interface
+  shell: qm set '{{ idnewvm.stdout }}' --ipconfig0 ip='{{ vm_ip1 }}'
+
+- name: add net 1 interface 
+  shell: qm set '{{ idnewvm.stdout }}' --net1 virtio,bridge=vmbr1,tag=521,link_down=0
+- name: update ip 1 interface
+  shell: qm set '{{ idnewvm.stdout }}' --ipconfig1 ip='{{ vm_ip2 }}'
+
+- name: add net 2 interface
+  shell: qm set '{{ idnewvm.stdout }}' --net2 virtio,bridge=vmbr1,tag=15,link_down=0
+- name: update ip  2 interface
+  shell: qm set '{{ idnewvm.stdout }}' --ipconfig2 ip='{{ vm_ip3 }}',gw='{{ vm_gw }}'
+
+- name: Update vm
+  community.general.proxmox_kvm:
+    node: '{{ pmx_node }}'
+    api_user: '{{ pmx_api_user }}'
+    api_password: '{{ pmx_api_passwd }}'
+    api_host: '{{ pmx_api_host }}'
+    ciuser: '{{ vm_ciuser }}'
+    cipassword: '{{ vm_cipassword }}'
+    vmid: '{{ idnewvm.stdout }}'
+    update: yes
+    cores: '{{ vm_cores }}'
+    memory: '{{ memory }}'
+    description: created with ansible
+    onboot: yes
+
+- name: Start vm unifi controller
+  community.general.proxmox_kvm:
+    node: '{{ pmx_node }}'
+    api_user: '{{ pmx_api_user }}'
+    api_password: '{{ pmx_api_passwd }}'
+    api_host: '{{ pmx_api_host }}'
+    name: '{{ vmname }}'
+    state: started
+
+#- name: Wait for start server
+#  wait_for:
+#    port: '{{ vm_ssh_port }}'
+#    host: '{{ vm_ip1 }}'
+#    delay: 10
+#    timeout: 300
