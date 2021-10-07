@@ -1,6 +1,6 @@
 ---
 
-- name: Install Apache Web server
+- name: Install Apache Web server test
   hosts: "{{ w_host | default('test') }}"
 
 
