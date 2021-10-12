@@ -15,7 +15,7 @@
     password: '{{ vm_cipassword }}'
     hostname: '{{ item.key }}'
     ostemplate: '{{ vmclone }}'
-    netif: '{"net0":"name=eth0,gw={{ vm_gw }},ip={{ item.value.vm_ip }}/24,bridge={{ pmx_bridge }}"}'
+    netif: '{"net0":"name=eth0,gw={{ vm_gw }},ip={{ item.value.vm_ip }}/{{ vm_mask }},bridge={{ pmx_bridge }}"}'
     cores: '{{ vm_cores }}'
     memory: '{{vm_memory }}'
     disk: '{{ vm_hdd }}'
@@ -24,22 +24,13 @@
     searchdomain: '{{ vm_domain_search }}'
     onboot: yes
     pubkey: '{{ vm_pubkey }}'
-    timeout: 300
+    timeout: 30
+
 
 - name: Start container
   community.general.proxmox:
     vmid: '{{ idnewvm.stdout }}'
     api_user: '{{ pmx_api_user }}'
-    api_password: '{{ pmx_api_host }}'
-    api_host: '{{ pmx_node }}'
+    api_password: '{{ pmx_api_passwd }}'
+    api_host: '{{ pmx_api_host }}'
     state: started
-
-- name: Wait for start server
-  wait_for:
-    port: '{{ vm_ssh_port }}'
-    host: '{{ item.key }}'
-    delay: 10
-    timeout: 300
-
-
-

@@ -1,2 +1,7 @@
 ---
 # handlers file for docker_swarm_proxmox_role
+- name: get next id vm
+  shell:
+      vmid=$(pvesh get /cluster/nextid);
+      echo $vmid
+  register: idnewvm

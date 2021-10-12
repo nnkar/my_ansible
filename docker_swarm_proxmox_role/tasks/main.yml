@@ -3,4 +3,10 @@
 - import_tasks: preparation_node.yml
 
 - include_tasks: create_vm_proxmox.yml
-  with_dict: vm_names
+  with_dict: '{{ vm_names }}'
+
+- name: timeuot 120 or 300 )
+  wait_for:
+    timeout: 300
+
+

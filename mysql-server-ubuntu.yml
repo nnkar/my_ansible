@@ -1,0 +1,161 @@
+--- # Install mariadb via ansible
+
+- name: Install MySQL server
+  hosts: "{{ w_host | default('test') }}"
+ 
+  vars:
+    mysql_root_password: ghgvjsyd675rf
+    mariadb_packages:
+      - mariadb-server
+      - mariadb-common
+      - mariadb-client
+      - python-openssl
+      - python3-mysqldb
+    mariadb_config_file:
+      mysqld:
+        - "user = mysql"
+        - "port = 3306"
+        - "datadir = /var/lib/mysql"
+        - "skip-external-locking"
+        - "skip-name-resolve"
+        - "key_buffer_size	= 16M"
+        - "max_allowed_packet	= 16M"
+        - "thread_stack	= 192K"
+        - "thread_cache_size = 8"
+        - "query_cache_size  = 32M"
+        - "log_error = /var/log/mariadb/error.log"
+        - "unix_socket=OFF"
+        - "bind-address= 0.0.0.0"
+    swappiness: "0"
+    allow_remote_connections: true
+    mariadb_socket: /run/mysqld/mysqld.sock
+    mariadb_service: mariadb
+    mariadb_logrotate:
+        rotate: "7"
+        rotation: daily
+    my_db: zabbix
+    my_user_db: zabbix
+    my_user_db_passwd: gdgdrgdrdrgdrg
+
+  tasks:
+    - name: upgrade all packages
+      apt:
+        name: '*'
+        state: latest  
+  
+    - name: Install MariaDB
+      apt: name="{{ mariadb_packages }}" state=present
+      
+    - name: start mysql server and enable it on reboot
+      service: name="{{ mariadb_service }}" state=started enabled=true #debian: mysql
+
+    - name: Create log directory
+      file:
+        state: directory
+        path: /var/log/mariadb
+        owner: mysql
+        group: mysql
+        mode: 0765
+
+    - name: Make mariadb server file configuration
+      template:
+        src: files/server.cnf.j2
+        dest: /etc/mysql/mariadb.cnf
+        backup: yes
+      notify: restart mariadb server
+
+    - name: Configure MariaDB Logrotate
+      template:
+        src: files/mariadb_logrotate.j2
+        dest: /etc/logrotate.d/mysql
+      notify: restart mariadb server
+
+    - name: Configure swappiness
+      sysctl:
+        name: vm.swappiness
+        value: "{{ swappiness }}"
+        state: present
+
+    - name: Check if custom password is specified for root user
+      debug:
+        msg: >
+          WARNING DETECTED !!! the password for mysql root user is empty.
+          Please set a password with a variable mysql_root_password on defaults/main.yml
+          te secure the root user.
+      when: not mysql_root_password
+
+    - name: Check if mysql root password was not set
+      shell: >
+        mysql -u root
+        -h localhost
+        -e "quit"
+      changed_when: false
+      ignore_errors: true
+      register: check_passwd_root
+
+
+    - name: update mysql root password for all root accounts
+      mysql_user:
+        name: root
+        host: "{{ item }}"
+        password: "{{ mysql_root_password }}"
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        check_implicit_admin: yes
+        priv: "*.*:ALL,GRANT"
+      with_items:
+        - "{{ ansible_hostname }}"
+        - 127.0.0.1
+        - ::1
+        - localhost
+      when: check_passwd_root.rc == 0
+      notify: Flush Priviliges
+
+    - name: Remove all anonymous user
+      mysql_user:
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        name: 'ansible'
+        host_all: yes
+        state: absent
+      when: check_passwd_root.rc == 0
+      notify: Flush Priviliges
+
+    - name: Remove test database
+      mysql_db:
+        login_user: "root"
+        login_password: "{{ mysql_root_password }}"
+        db: "test"
+        state: absent
+      register: remove_test_db
+      when: check_passwd_root.rc == 0
+      notify: Flush Priviliges
+
+    - name: create a my database
+      mysql_db: 
+        name: "{{ my_db }}" 
+        encoding: utf8
+        state: present 
+        login_user: root 
+        login_password: "{{ mysql_root_password }}"
+
+    - name: Create user for my db
+      mysql_user:
+        name: "{{ my_user_db }}"
+        password: "{{ my_user_db_passwd }}"
+        priv: "{{ my_db }}.*:ALL,GRANT"
+        host: "%"
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        state: present
+      notify: Flush Priviliges
+     
+  handlers:
+    - name: Flush Priviliges
+      command: mysql -u root -p{{ mysql_root_password }} -e "FLUSH PRIVILEGES"
+
+    - name: restart mariadb server
+      systemd:
+        name: "{{ mariadb_service }}"
+        state: restarted
+        enabled: yes
