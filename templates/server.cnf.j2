@@ -11,8 +11,7 @@ bind-address  = 127.0.0.1
 bind-address  = 127.0.0.1
 {% endif %}
 
-
 {% if  ansible_distribution_file_variety == "Debian" %}
-!includedir /etc/mysql/mariadb.conf.d/
 !includedir /etc/mysql/conf.d/
+!includedir /etc/mysql/mariadb.conf.d/
 {% endif %}
