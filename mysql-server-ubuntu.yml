@@ -83,8 +83,7 @@
       debug:
         msg: >
           WARNING DETECTED !!! the password for mysql root user is empty.
-          Please set a password with a variable mysql_root_password on defaults/main.yml
-          te secure the root user.
+          Please set a password with a variable mysql_root_password.
       when: not mysql_root_password
 
     - name: Check if mysql root password was not set
