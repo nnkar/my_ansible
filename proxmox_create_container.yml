@@ -23,7 +23,7 @@
     vm_dns: "8.8.8.8"
     vm_domain_search: "evolife.local"
 
-    vm_pubkey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDWBisd5FZ9GC9fZolu8Q27tqthOyujLrclbLefp44zFE9aG8mndPFrDKqjn74H045S1W2MSyrgq5XgwHJAgQnueSn/pG8SBw76h/DHWvgwkt7f6sZ8Bvu2gW6zNZ8yXOR8asdGvs0nUOzGj98gRyHYRJK4sn5NYJQwxCFgcxVyOU46CzrdXZB6WXZzRg330RrUGQFklK5zPp+l2ABIRwAhvFAGJz06ujCPXt+fpYKZQ4ygi0/uL9LsVuD+N1Avqtqpt2q6wLJIsqrPQJXZhpZzMUzey41HSPVnEQ9E5I16/RnShrCyJXLmAeaDDdHlP96Q3KEU1HH77v7eyLEY9O98XcH root@ansible'
+    vm_pubkey: 'ssh-rsa XcH root@ansible'
     vm_cores: 4
     vm_memory: 2048
     vm_swap_size: 1024

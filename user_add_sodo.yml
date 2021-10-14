@@ -1,0 +1,16 @@
+---
+# ansible-playbook user_add_sudo.yml -e w_host=<HOST_NAME> -e u_name=<USER_NAME>
+- name:  add user in sudoers
+  hosts: "{{ w_host | default('test') }}"
+
+  #become: true 
+
+  vars:
+    user_name: "{{ u_name }}"
+  
+  tasks:
+    - name: create file to /etc/sudoers.d
+      template:
+        src: templates/add_sudoers_user.j2
+        dest: "/etc/sudoers.d/{{ user_name }}"
+

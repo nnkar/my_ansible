@@ -4,6 +4,7 @@
   hosts: "{{ w_host | default('test') }}"
  
   vars:
+    mysql_root_user: root
     mysql_root_password: ghgvjsyd675rf
     mariadb_packages:
       - mariadb-server
@@ -17,9 +18,10 @@
         - "port = 3306"
         - "datadir = /var/lib/mysql"
         - "skip-external-locking"
+        - "innodb_strict_mode = 0"
         - "skip-name-resolve"
         - "key_buffer_size	= 16M"
-        - "max_allowed_packet	= 16M"
+        - "max_allowed_packet	= 512M"
         - "thread_stack	= 192K"
         - "thread_cache_size = 8"
         - "query_cache_size  = 32M"
@@ -33,15 +35,16 @@
     mariadb_logrotate:
         rotate: "7"
         rotation: daily
-    my_db: zabbix
-    my_user_db: zabbix
-    my_user_db_passwd: gdgdrgdrdrgdrg
+    my_databases:
+      zabbix:
+        my_user_db: zabbix
+        my_user_db_passwd: gdgdrgdrdrgdrg
 
   tasks:
     - name: upgrade all packages
       apt:
         name: '*'
-        state: latest  
+        state: latest
   
     - name: Install MariaDB
       apt: name="{{ mariadb_packages }}" state=present
@@ -88,7 +91,7 @@
 
     - name: Check if mysql root password was not set
       shell: >
-        mysql -u root
+        mysql -u "{{ mysql_root_user }}"
         -h localhost
         -e "quit"
       changed_when: false
@@ -98,10 +101,10 @@
 
     - name: update mysql root password for all root accounts
       mysql_user:
-        name: root
+        name: "{{ mysql_root_user }}"
         host: "{{ item }}"
         password: "{{ mysql_root_password }}"
-        login_user: root
+        login_user: "{{ mysql_root_user }}"
         login_password: "{{ mysql_root_password }}"
         check_implicit_admin: yes
         priv: "*.*:ALL,GRANT"
@@ -115,7 +118,7 @@
 
     - name: Remove all anonymous user
       mysql_user:
-        login_user: root
+        login_user: "{{ mysql_root_user }}"
         login_password: "{{ mysql_root_password }}"
         name: 'ansible'
         host_all: yes
@@ -125,7 +128,7 @@
 
     - name: Remove test database
       mysql_db:
-        login_user: "root"
+        login_user: "{{ mysql_root_user }}"
         login_password: "{{ mysql_root_password }}"
         db: "test"
         state: absent
@@ -133,28 +136,30 @@
       when: check_passwd_root.rc == 0
       notify: Flush Priviliges
 
-    - name: create a my database
+    - name: create a my databases
       mysql_db: 
-        name: "{{ my_db }}" 
+        name: "{{ item.key }}" 
         encoding: utf8
         state: present 
-        login_user: root 
+        login_user: "{{ mysql_root_user }}" 
         login_password: "{{ mysql_root_password }}"
+      with_dict: "{{ my_databases }}"
 
-    - name: Create user for my db
+    - name: Create users for my db
       mysql_user:
-        name: "{{ my_user_db }}"
-        password: "{{ my_user_db_passwd }}"
-        priv: "{{ my_db }}.*:ALL,GRANT"
+        name: "{{ item.value.my_user_db }}"
+        password: "{{ item.value.my_user_db_passwd }}"
+        priv: "{{ item.key }}.*:ALL,GRANT"
         host: "%"
-        login_user: root
+        login_user: "{{ mysql_root_user }}"
         login_password: "{{ mysql_root_password }}"
         state: present
+      with_dict: "{{ my_databases }}"
       notify: Flush Priviliges
      
   handlers:
     - name: Flush Priviliges
-      command: mysql -u root -p{{ mysql_root_password }} -e "FLUSH PRIVILEGES"
+      command: "mysql -u {{ mysql_root_user }} -p{{ mysql_root_password }} -e 'FLUSH PRIVILEGES'"
 
     - name: restart mariadb server
       systemd:

@@ -1,0 +1,93 @@
+---
+#  ansible-playbook zabbix_db_vm_create.yml --ask-vault-pass
+- name: Create vm zabbix db
+  hosts: node_1
+  vars_files:
+      - passwords.yml # vault encrypt file
+  vars:
+    vmname: zabbix-db.example.local
+    vmclone: ubuntu-20-template-3
+    pmx_api_host: node_1
+    pmx_api_root: root@pam
+    pmx_api_passwd_root: '{{ pmx_api_passwd }}'
+    pmx_node: node_1
+    vm_cores: 8
+    vm_memory: 8192
+    vm_ciuser: root
+    vm_cipassword: "Passw0rd2"
+    vm_ip: 192.168.1.144
+    vm_ip_mask: 24
+    vm_gw: "192.168.1.1"
+    vm_dns: "8.8.8.8"
+    vm_domain_search: "example.local"
+    vm_hdd: storage-local
+
+  tasks:
+  - name: install pip pip3
+    apt:
+      name: "{{ packages }}"
+      state: present
+      update_cache: no
+    vars:
+      packages:
+      - python-pip
+      - python3-pip 
+
+  - name:  install proxmoxer pip
+    pip:
+      name: proxmoxer
+      executable: pip
+
+  - name:  install requests pip
+    pip:
+      name: requests
+      executable: pip
+
+  - name:  install proxmoxer pip3
+    pip:
+      name: proxmoxer
+      executable: pip3
+
+  - name:  install requests pip3
+    pip:
+      name: requests
+      executable: pip3
+
+  - name: get next id vm
+    shell:
+      vmid=$(pvesh get /cluster/nextid);
+      echo $vmid
+    register: idnewvm
+
+  - name: Clone vm
+    community.general.proxmox_kvm:
+      node: '{{ pmx_node }}'
+      api_user: '{{ pmx_api_root }}'
+      api_password: '{{ pmx_api_passwd_root }}'
+      api_host: '{{ pmx_api_host }}'
+      clone: '{{ vmclone }}'
+      name: '{{ vmname }}'
+      full: yes
+      storage: '{{ vm_hdd }}'
+      newid: '{{ idnewvm.stdout }}'
+      timeout: 300
+
+  - name: update ip 0 interface
+    shell: qm set '{{ idnewvm.stdout }}' --ipconfig0 ip='{{ vm_ip }}'/'{{ vm_ip_mask }}',gw='{{ vm_gw }}'
+
+  - name: Update vm
+    community.general.proxmox_kvm:
+      node: '{{ pmx_node }}'
+      api_user: '{{ pmx_api_root }}'
+      api_password: '{{ pmx_api_passwd_root }}'
+      api_host: '{{ pmx_api_host }}'
+      ciuser: '{{ vm_ciuser }}'
+      cipassword: '{{ vm_cipassword }}'
+      vmid: '{{ idnewvm.stdout }}'
+      update: yes
+      cores: '{{ vm_cores }}'
+      memory: '{{ vm_memory }}'
+      description: created with ansible
+      onboot: yes
+
+
