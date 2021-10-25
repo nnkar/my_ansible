@@ -1,0 +1,34 @@
+---
+# ansible-playbook delete_user.yml -e d_user=USERNAME -e w_host=SERVER
+
+ - name: Delete  user
+   hosts: "{{ w_host | default('test') }}"
+
+   vars:
+     del_user:  '{{ d_user }}'
+
+   tasks:
+   - name: delete users # - '{{ del_user }}'
+     user:
+       name: '{{ del_user }}'
+       state: absent
+       remove: yes
+
+   - name: Delete group.
+     group:
+       name: '{{ del_user }}'
+       state: absent
+
+   - name: Disable sudo user
+     lineinfile:
+       dest: /etc/sudoers
+       state: present
+       regexp: '^{{ del_user }}'
+       line: ''
+       validate: visudo -cf %s
+
+   - name: Del file sudoers.d
+     file:
+       dest: "/etc/sudoers.d/{{ del_user }}"
+       state: absent
+
