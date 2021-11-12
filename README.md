@@ -1,2 +1,5 @@
 # my_ansible
-для учебы и не только
+заметки для учебы и не только
+
+для генерации хешей паролей пользователя \
+python3 -c 'import crypt; print(crypt.crypt("ПАРОЛЬ", crypt.mksalt(crypt.METHOD_SHA512)))'
