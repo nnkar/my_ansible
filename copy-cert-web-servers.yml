@@ -1,0 +1,53 @@
+---
+
+- name: Copy cert web server
+  hosts: "{{ w_host | default('test') }}"
+
+  # become: true # если истина, то выполнятся все операции от имени root, вместо sudo
+
+  vars:
+    nginx_service: nginx
+    ubuntu_service: apache2
+    centos_service: httpd
+
+  tasks:
+    - name: Creates directory etc/ssl/example_www
+      file:
+        path: /etc/ssl/example_www
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+        recurse: yes
+
+    - name: Copy file crt
+      copy: src=files/ssl_certs/example_ru.crt dest=/etc/ssl/example_www/example_ru.crt mode=0644
+
+    - name: Copy file crt CA
+      copy: src=files/ssl_certs/example_ru_ca.crt dest=/etc/ssl/example_www/example_ru_ca.crt mode=0644
+
+    - name: Copy file key
+      copy: src=files/ssl_certs/example_ru.key dest=/etc/ssl/example_www/example_ru.key mode=0644
+
+    - block:
+      - name: retarting nginx
+        service: name='{{ nginx_service }}' state=restarted enabled=yes
+
+      - name: Status Nginx
+        command: systemctl status '{{ nginx_service }}'
+      when: "'nginx' in ansible_facts.packages"
+
+    - block:
+      - name: restart apache2 Centos
+        service: name='{{ centos_service }}' state=restarted enabled=yes
+      - name: Status Apache
+        command: systemctl status '{{ centos_service }}'
+      when: ansible_distribution == 'CentOS' and "'{{ centos_service }}' in ansible_facts.packages"
+
+    - block:
+      - name: restart apache2  Ubuntu/Debian
+        service: name='{{ ubuntu_service }}' state=restarted enabled=yes
+      - name: Status Apache
+        command: systemctl status '{{ ubuntu_service }}'
+      when: (ansible_distribution == 'Ubuntu' or ansible_distribution == 'Debian') and "'{{ ubuntu_service }}' in ansible_facts.packages"
+
