@@ -1,0 +1,9 @@
+---
+
+- name: Ubuntu apt autoremove
+  hosts: "{{ w_host | default('test') }}"
+
+  tasks:
+    - name: apt autoremove start
+      shell: /usr/bin/apt autoremove -y
+

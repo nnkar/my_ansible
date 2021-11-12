@@ -7,8 +7,11 @@ rezerv1_ip_host : '192.168.1.65'
 rezerv2_ip_host : '192.168.1.66'
 inet_ip_host    : ''
 inet_if_host    : ''
-open_ports_tcp  : ''
-open_ports_udp  : ''
+# bareos client - 9101,9102,9103
+# zabbix-agent  - 10050
+# snmp          - 161
+open_ports_tcp  : '10050,9101,9102,9103'
+open_ports_udp  : '161'
 remove_soft:
   - firewalld
 install_soft_centos:
