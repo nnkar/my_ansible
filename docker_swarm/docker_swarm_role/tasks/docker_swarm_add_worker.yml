@@ -1,0 +1,15 @@
+---
+- name: determine swarm status
+  shell: >
+    docker info | grep 'Swarm:' | sed -e 's/^ //' | cut -d ' ' -f2
+  register: swarm_status
+
+- local_action: shell cat "/tmp/worker_token"
+  register: worker_token
+
+- local_action: shell cat "/tmp/docker_swarm_man_ip"
+  register: docker_swarm_man_ip
+
+- name: Add Workers to the Swarm
+  shell: "docker swarm join --token {{ worker_token.stdout }} {{ docker_swarm_man_ip.stdout }}:2377"
+  when: "'active' not in swarm_status.stdout_lines"

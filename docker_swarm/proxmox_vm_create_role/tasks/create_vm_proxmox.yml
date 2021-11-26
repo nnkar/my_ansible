@@ -1,0 +1,37 @@
+---
+
+- name: get next id vm
+  shell:
+      vmid=$(pvesh get /cluster/nextid);
+      echo $vmid
+  register: idnewvm
+- name: Create new container
+  community.general.proxmox:
+    vmid: '{{ idnewvm.stdout }}'
+    node: '{{ pmx_node }}'
+    api_user: '{{ pmx_api_user }}'
+    api_password: '{{ pmx_api_passwd }}'
+    api_host: '{{ pmx_api_host }}'
+    password: '{{ vm_cipassword }}'
+    hostname: '{{ item }}'
+    ostemplate: '{{ vmclone }}'
+    netif: '{"net0":"name=eth0,gw={{ vm_gw }},ip={{ hostvars[ item ].ansible_ssh_host }}/{{ vm_mask }},bridge={{ pmx_bridge }}"}'
+    cores: '{{ vm_cores }}'
+    memory: '{{vm_memory }}'
+    disk: '{{ vm_hdd }}'
+    swap: '{{ vm_swap_size }}'
+    nameserver: '{{ vm_dns }}'
+    searchdomain: '{{ vm_domain_search }}'
+    onboot: yes
+    pubkey: '{{ vm_pubkey }}'
+    timeout: 30
+
+
+- name: Start container
+  community.general.proxmox:
+    vmid: '{{ idnewvm.stdout }}'
+    api_user: '{{ pmx_api_user }}'
+    api_password: '{{ pmx_api_passwd }}'
+    api_host: '{{ pmx_api_host }}'
+    state: started
+

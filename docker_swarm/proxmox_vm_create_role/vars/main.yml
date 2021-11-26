@@ -1,0 +1,27 @@
+---
+# vars file for proxmox_vm_create_role
+vmclone: 'storage-local:vztmpl/ubuntu-20.04-standard_20.04-1_amd64.tar.gz'
+pmx_node: nd1
+pmx_storage: storage-local
+pmx_bridge: vmbr0
+
+pmx_api_host: nd1
+pmx_api_user: root@pam
+pmx_api_passwd: PASSWORD1
+
+vm_ciuser: root
+vm_cipassword: Passw0rd2
+
+vm_ssh_port: 22
+vm_gw: "192.168.223.1"
+vm_dns: "8.8.8.8"
+vm_domain_search: "test.local"
+vm_mask: 24
+
+vm_pubkey: 'ssh-rsa KEY_SSH_ANSIBLE root@ansible'
+vm_cores: 4
+vm_memory: 4096
+vm_swap_size: 2048
+vm_hdd: 'storage-local:30'
+
+
