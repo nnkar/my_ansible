@@ -1,0 +1,35 @@
+---
+- name: install nginx in cluster
+  hosts: "{{ w_host | default('test') }}"
+..
+  tasks:
+    - name: Remove image
+      docker_image:
+        state: absent
+        name: "nginx"
+
+    - name: pull.
+      docker_image:
+        name: "nginx"
+        source: pull
+        timeout: 300
+
+    - name: service create
+      docker_swarm_service:
+        name: 'nginx'
+        image: 'nginx'
+        mode: replicated
+        replicas: 5
+        restart_config:
+          condition: 'on-failure'
+          delay: 5s
+          max_attempts: 3
+          window: 120s
+        constraints:
+          - node.role == manager
+        publish:.
+          - mode: host
+            published_port: '8080'
+            target_port: '80'
+
+
