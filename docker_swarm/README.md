@@ -23,6 +23,11 @@ Example Playbook
 	  roles:
 	    - role: docker_swarm_role
 
+	- name: install portainer
+	  hosts: docker-swarm-manager
+	  roles:
+	    - role: docker_portainer_role
+
 License
 -------
 

@@ -24,6 +24,8 @@
     searchdomain: '{{ vm_domain_search }}'
     onboot: yes
     pubkey: '{{ vm_pubkey }}'
+    features:
+     - nesting=1
     timeout: 30
 
 
