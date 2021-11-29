@@ -1,7 +1,7 @@
 ---
 - name: install nginx in cluster
   hosts: "{{ w_host | default('test') }}"
-..
+
   tasks:
     - name: Remove image
       docker_image:
@@ -26,8 +26,8 @@
           max_attempts: 3
           window: 120s
         constraints:
-          - node.role == manager
-        publish:.
+          - node.role == worker
+        publish:
           - mode: host
             published_port: '8080'
             target_port: '80'
