@@ -6,6 +6,9 @@
 - name: Create ssl certificate
   shell: openssl req -new -x509 -days 1461 -nodes -out {{docker_container_ssl_dir}}/public.pem -keyout {{docker_container_ssl_dir}}/private.key -subj "{{ docker_container_subj_ssl }}"
 
+- name: Create auth user
+  shell: htpasswd -Bbn '{{ docker_user }}' '{{ docker_user_password }}' > '{{ docker_container_auth_dir }}'/htpasswd
+
 - name: Remove image
   docker_image:
     state: absent
