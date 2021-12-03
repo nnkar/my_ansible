@@ -1,0 +1,83 @@
+---
+
+- name: Install docker Ubuntu
+  block:
+  - name: Install required system packages
+    apt: name={{ item }} state=latest update_cache=yes
+    loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools', 'gnupg-agent']
+  
+  - name: lsb_release
+    shell: lsb_release -sc
+    register: result
+
+  - name: Add Docker GPG apt Key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+
+  - name: Add Docker Repository
+    apt_repository:
+      repo: deb https://download.docker.com/linux/ubuntu {{ result.stdout }} stable
+      state: present
+
+  - name: Install Docker
+    apt:
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+      - docker-ce
+      - docker-ce-cli 
+      - containerd.io
+
+  - name: Install Docker Module for Python
+    pip:
+      name: docker
+  when: ansible_distribution == "Ubuntu"
+
+- name: Install Docker CentOS
+  block:
+  - name: Install soft centos
+    yum: name={{item}} state=latest
+    loop: [ 'yum-utils', 'device-mapper-persistent-data', 'lvm2', 'python3-docker']
+
+  - name: Add Docker repo
+    get_url:
+      url: https://download.docker.com/linux/centos/docker-ce.repo
+      dest: /etc/yum.repos.d/docker-ce.repo
+
+  - name: Install Docker
+    package:
+      name: docker-ce
+      state: latest
+
+  - name: Start Docker service
+    service:
+      name: docker
+      state: started
+      enabled: yes
+  when: ansible_distribution == "CentOS"
+
+- name: Check current docker-compose version
+  command: docker-compose --version
+  register: docker_compose_vsn
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  
+- set_fact:
+    docker_compose_current_version: "{{ docker_compose_vsn.stdout | regex_search('(\\d+(\\.\\d+)+)') }}"
+  when:
+    - docker_compose_vsn.stdout is defined
+
+- name: Install or upgrade docker-compose
+  get_url: 
+    url : "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
+    dest: /usr/bin/docker-compose
+    mode: 'a+x'
+    force: yes
+  when: >
+    docker_compose_current_version is not defined
+    or docker_compose_current_version is version(docker_compose_version, '<')
+

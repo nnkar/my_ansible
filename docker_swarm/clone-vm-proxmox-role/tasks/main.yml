@@ -1,0 +1,7 @@
+---
+# tasks file for clone-vm-proxmox-role
+- import_tasks: preparation_node.yml
+
+- import_tasks: clone_vm_proxmox.yml
+  with_items: "{{ groups['docker-swarm'] }}"
+

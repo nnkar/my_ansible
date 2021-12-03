@@ -1,0 +1,18 @@
+---
+# ansible-playbook docker_local_repository.yml -e w_host=nd1
+- name: create vm container
+  hosts: nd1
+  roles:
+    - role: clone-vm-proxmox-role
+
+- name: install docker to vm
+  hosts: dockerrep
+  roles:
+    - role: docker_role
+
+- name: install repository
+  hosts: dockerrep
+  roles:
+    - role: docker_registry_role
+
+

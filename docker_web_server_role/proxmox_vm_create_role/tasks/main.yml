@@ -1,0 +1,12 @@
+---
+# tasks file for proxmox_vm_create_role
+- import_tasks: preparation_node.yml
+
+- include_tasks: create_vm_proxmox.yml
+  with_items: "{{ groups['docker-swarm'] }}"
+
+- name: timeuot 120 or 300 )
+  wait_for:
+    timeout: 300
+
+

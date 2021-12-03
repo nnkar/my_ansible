@@ -1,0 +1,28 @@
+---
+# vars file for clone-vm-proxmox-role
+
+vmclone: ubuntu-20-template-4
+pmx_node: nd1
+pmx_storage: storage-local
+pmx_bridge: vmbr0
+
+pmx_api_host: nd1
+pmx_api_user: root@pam
+pmx_api_passwd: P@ssw0rd
+
+vm_ciuser: root
+vm_cipassword: Passw000rd
+
+vm_mask: "24"
+vm_ssh_port: 22
+vm_gw: "192.168.223.1"
+vm_dns1: "8.8.8.8"
+vm_dns2: "8.8.4.4"
+vm_domain_search: "evolife.local"
+
+vm_cores: 2
+vm_memory: 1024
+vm_pubkey: "ssh-rsa SSH_KEY_ANSIBLE root@ansible"
+
+
+

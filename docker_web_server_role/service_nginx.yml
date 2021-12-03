@@ -2,11 +2,6 @@
 - name: install nginx in cluster
   hosts: "{{ w_host | default('test') }}"
 
-  vars:
-    user_ct: testuser
-    group_ct: testgroup
-    working_dir: "/var/www/html"
- 
   tasks:
     - name: Remove image
       docker_image:
@@ -25,9 +20,6 @@
         image: 'nginx'
         mode: replicated
         replicas: 5
-        user: '{{ user_ct }}'
-        groups:
-          - '{{ group_ct }}'
         restart_config:
           condition: 'on-failure'
           delay: 5s
@@ -39,11 +31,5 @@
           - mode: host
             published_port: '8080'
             target_port: '80'
-        # healthcheck:
-        #   test: ["CMD", "curl", "--fail", "http://nginx.host.com"]
-        #   interval: 1m30s
-        #   timeout: 10s
-        #   retries: 3
-        #   start_period: 30s
 
 

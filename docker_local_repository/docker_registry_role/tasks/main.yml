@@ -1,0 +1,6 @@
+---
+# tasks file for registry
+
+- include: docker_registry_role.yml
+
+

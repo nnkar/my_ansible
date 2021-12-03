@@ -1,0 +1,8 @@
+
+nd1 ansible_ssh_host=192.168.223.176 ansible_ssh_port=22
+
+dockerrep ansible_ssh_port=22 ansible_ssh_host=192.168.223.157
+
+[docker-hosts]
+dockerrep
+

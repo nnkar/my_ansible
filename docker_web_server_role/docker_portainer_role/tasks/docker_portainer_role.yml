@@ -1,0 +1,62 @@
+---
+
+- name: remove apparmor
+  apt:
+    name: apparmor
+    state: absent
+
+- name: set docker_portainer_volume
+  set_fact: docker_portainer_volume="{{docker_portainer_container_volume_base}}/{{docker_portainer_container_name}}"
+
+- name: create volume directory for data
+  file: path={{docker_portainer_volume}}/data state=directory recurse=yes
+
+- name: Remove image
+  docker_image:
+    state: absent
+    name: "{{ docker_portainer_image }}:{{ docker_portainer_version }}"
+
+- name: pull an image portainer
+  docker_image:
+    name: "{{ docker_portainer_image }}:{{ docker_portainer_version }}"
+    source: pull
+    timeout: 300
+
+- name: initial database
+  copy:
+    src: "{{docker_portainer_initial_database_file}}"
+    dest: "{{docker_portainer_volume}}/data/portainer.db"
+    mode: 0600
+    force: no
+  when: docker_portainer_initial_database_file != ""
+
+- name: service create portainer
+  docker_swarm_service:
+    name: '{{docker_portainer_container_name}}'
+    image: 'portainer/portainer:{{docker_portainer_version}}'
+    mode: replicated
+    replicas: 1
+    mounts:
+      - source: "/var/run/docker.sock"
+        target: "/var/run/docker.sock"
+        type: bind
+      - source: "{{docker_portainer_volume}}/data"
+        target: "/data"
+        type: bind
+    restart_config:
+      condition: '{{docker_portainer_restart_policy}}'
+      delay: 5s
+      max_attempts: 3
+      window: 120s
+    constraints:
+      - node.role == manager
+    publish:
+      - mode: host
+        published_port: '{{ docker_portainer_port }}'
+        target_port: '9000'
+
+- name: install agent portainer
+  shell: curl -L https://downloads.portainer.io/agent-stack.yml -o agent-stack.yml && docker stack deploy --compose-file=agent-stack.yml portainer-agent
+
+
+

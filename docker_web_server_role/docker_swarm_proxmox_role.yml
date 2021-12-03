@@ -1,0 +1,11 @@
+---
+- name: install nginx + php-fpm + mysql + lets encrypt 
+  hosts: docker-swarm
+  roles:
+    - role: install_service_nginx
+    - role: install_service_php
+    - role: install_service_mysql
+    - role: install_service_letsencrypt
+    - role: install_service_wordpress  # test
+
+

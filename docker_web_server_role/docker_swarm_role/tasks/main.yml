@@ -1,0 +1,22 @@
+---
+# tasks file for docker_swarm_role
+
+- include: docker_swarm_init.yml
+  when: "'{{ inventory_hostname }}' == '{{ item }}'"
+  with_items: "{{ groups['docker-swarm-manager'] }}"
+
+- include: docker_swarm_add_manager.yml
+  when: "'{{ inventory_hostname }}' == '{{ item }}'"
+  with_items: "{{ groups['docker-swarm-managers'] }}"
+
+- include: docker_swarm_add_worker.yml
+  when: "'{{ inventory_hostname }}' == '{{ item }}'"
+  with_items: "{{ groups['docker-swarm-workers'] }}"
+
+#- name: echo vars 11111111111
+#  debug:
+#      msg: "'{{ inventory_hostname }}' {{ groups['docker-swarm-manager'] }}"
+#  when: "'{{ inventory_hostname }}' == '{{ item }}'"
+#  with_items: "{{ groups['docker-swarm-workers'] }}"
+
+

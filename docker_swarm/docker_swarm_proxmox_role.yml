@@ -3,7 +3,7 @@
 - name: create vm container
   hosts: nd1
   roles:
-    - role: proxmox_vm_create_role
+    - role: clone-vm-proxmox-role
 
 - name: install docker to vm
   hosts: docker-swarm

@@ -1,0 +1,62 @@
+---
+- name: get next id vm
+  shell:
+      vmid=$(pvesh get /cluster/nextid);
+      echo $vmid
+  register: idnewvm
+
+- name: Clone vm
+  community.general.proxmox_kvm:
+    node: '{{ pmx_node }}'
+    api_user: '{{ pmx_api_user }}'
+    api_password: '{{ pmx_api_passwd }}'
+    api_host: '{{ pmx_api_host }}'
+    clone: '{{ vmclone }}'
+    name: '{{ item }}'
+    full: yes
+    storage: '{{pmx_storage}}'
+    newid: '{{ idnewvm.stdout }}'
+    timeout: 600
+
+- name: update ip 0 interface
+  shell: qm set '{{ idnewvm.stdout }}' --ipconfig0 ip='{{ hostvars[ item ].ansible_ssh_host }}/{{ vm_mask }}',gw='{{ vm_gw }}'
+
+# - name: add net 1 interface 
+#   shell: qm set '{{ idnewvm.stdout }}' --net1 virtio,bridge=vmbr1,tag=521,link_down=0
+# - name: update ip 1 interface
+#   shell: qm set '{{ idnewvm.stdout }}' --ipconfig1 ip='{{ vm_ip2 }}'
+
+
+- name: Update vm
+  community.general.proxmox_kvm:
+    node: '{{ pmx_node }}'
+    api_user: '{{ pmx_api_user }}'
+    api_password: '{{ pmx_api_passwd }}'
+    api_host: '{{ pmx_api_host }}'
+    ciuser: '{{ vm_ciuser }}'
+    cipassword: '{{ vm_cipassword }}'
+    sshkeys: '{{ vm_pubkey }}'
+    searchdomains: '{{ vm_domain_search }}'
+    nameservers: 
+      - '{{ vm_dns1 }}'
+      - '{{ vm_dns2 }}'
+    vmid: '{{ idnewvm.stdout }}'
+    cores: '{{ vm_cores }}'
+    memory: '{{ vm_memory }}'
+    description: created with ansible
+    onboot: yes
+    update: yes
+
+- name: Start vm 
+  community.general.proxmox_kvm:
+    node: '{{ pmx_node }}'
+    api_user: '{{ pmx_api_user }}'
+    api_password: '{{ pmx_api_passwd }}'
+    api_host: '{{ pmx_api_host }}'
+    name: '{{ item }}'
+    state: started
+
+- name: Sleep for 120 seconds and continue with play
+  wait_for:
+    timeout: 120
+  delegate_to: localhost

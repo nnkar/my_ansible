@@ -1,11 +1,17 @@
 ---
 # tasks file for docker_role
-- name: Wait 60 sec for port ssh to become open and contain "OpenSSH"
+
+#- name: Sleep for 300 seconds and continue with play
+#  wait_for:
+#    timeout: 300
+#  delegate_to: localhost
+
+- name: Wait 10 sec for port ssh to become open and contain "OpenSSH"
   wait_for:
     port: '{{ ansible_ssh_port | default("22") }}'
     host: '{{ (ansible_ssh_host | default(ansible_host)) | default(inventory_hostname) }}'
     search_regex: OpenSSH
-    delay: 60
+    delay: 10
   connection: local
 
 - import_tasks: docker_install.yml

@@ -14,8 +14,7 @@ vm_cipassword: Passw0rd2
 
 vm_ssh_port: 22
 vm_gw: "192.168.223.1"
-vm_dns1: "8.8.8.8"
-vm_dns2: "8.8.4.4"
+vm_dns: "8.8.8.8"
 vm_domain_search: "test.local"
 vm_mask: 24
 
