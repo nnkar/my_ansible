@@ -1,0 +1,20 @@
+---
+- name: Install repos Centos
+  yum: name="{{ install_repos }}" state=present update_cache=yes
+  #with_items: "{{ install_repos }}"
+
+- name: upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+
+- name: Install soft Centos
+  yum: name="{{ install_soft }}" state=present
+
+- name: Remove soft Centos
+  yum: name="{{ remove_soft }}" state=absent
+
+
+
+
+

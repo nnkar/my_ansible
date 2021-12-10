@@ -1,0 +1,10 @@
+---
+
+- name: create file to /etc/sudoers.d
+  template:
+    src: add_sudoers_user.j2
+    dest: "/etc/sudoers.d/{{ user_name }}"
+
+    
+
+

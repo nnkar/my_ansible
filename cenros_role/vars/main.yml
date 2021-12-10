@@ -1,0 +1,80 @@
+---
+# vars file for centos_role
+
+# ntp client
+region: Europe
+city: Samara
+ntp_server_ip: "192.168.1.45"
+ntp_conf_c8: /etc/chrony.conf
+ntp_conf: /etc/ntp.conf
+
+# sudoers default - addmin
+user_name: "adddmin"
+user_comment: 'Default admin server'
+user_password: "PassW0rd123456"
+user_shell: '/bin/bash'
+user_home: '/home/{{ user_name }}'
+user_ssh_key: '' # 'ssh-rsa SSH_KEY_USER'
+
+# ssh key root
+file_conf: /etc/ssh/sshd_config
+lineModified: PermitRootLogin without-password
+
+# vars file for zabbix-agent
+zabbix_agent: zabbix-agent
+zabbix_agent_service: zabbix-agent
+zabbix_agent_conf: /etc/zabbix/zabbix_agentd.conf
+zabbix_server: "192.168.1.47"
+
+# install soft default
+install_repos:
+  - epel-release
+install_soft:
+  - wget
+  - libselinux
+  - libselinux-utils
+  - mc
+  - git
+  # - nmap
+  - traceroute
+  - tcpdump
+  - bind-utils
+  - net-tools
+  - cpan
+  - ipset
+  - ipset-service
+  - conntrack
+  - iptables
+  - iptables-services
+  - htop
+  - nmon
+  - atop
+  - tree
+  - psmisc
+  - ncdu
+  - nfs-utils
+  - policycoreutils-python
+remove_soft:
+  - firewalld
+install_soft_centos:
+  - iptables
+  - iptables-services
+  - ipset-service
+  - ipset
+
+# vars file for role-iptables
+lan_ip_host     : '{{ ansible_default_ipv4.address }}'
+lan_if_host     : '{{ ansible_default_ipv4.interface }}'
+mac_host        : '{{ ansible_default_ipv4.macaddress }}'
+rezerv1_ip_host : '192.168.1.65'
+rezerv2_ip_host : '192.168.1.66'
+inet_ip_host    : ''
+inet_if_host    : ''
+# bareos client - 9101,9102,9103
+# zabbix-agent  - 10050
+# snmp          - 161
+open_ports_tcp  : '10050,9101,9102,9103'
+open_ports_udp  : '161'
+
+
+  

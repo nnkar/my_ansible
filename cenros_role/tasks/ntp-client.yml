@@ -1,0 +1,63 @@
+---
+
+- name: Remove localtime
+  file:
+    path: /etc/localtime
+    state: absent
+
+- name: Create localtime
+  file:
+    src: "/usr/share/zoneinfo/{{ region }}/{{ city }}"
+    path: /etc/localtime
+    state: link
+
+- block: 
+  - name: Install ntp Centos
+    yum: name=ntp state=present
+
+  - name: Copy config file
+    template: 
+      src: ntp.conf.j2 
+      dest: '{{ ntp_conf }}'
+      owner: root
+      group: root
+      mode: 0644
+      backup: yes
+
+  - name: Restart ntpd Centos
+    service: 
+      name: ntpd
+      state: restarted
+
+  - name: Ensure NTP is running Centos
+    service: 
+      name: ntpd 
+      state: started 
+      enabled: yes
+  when: ansible_distribution == 'CentOS' and ansible_distribution_major_version < "8"
+
+
+- block: 
+  - name: Install soft Centos
+    yum: 
+      name: chrony 
+      state: present
+
+  - name: Ensure chrony is running.
+    service:
+      name: chronyd
+      state: started
+      enabled: yes
+
+  - lineinfile:
+      path: '{{ ntp_conf_c8 }}'
+      regexp: '^pool'
+      line: 'server {{ ntp_server_ip }}'
+
+  - name: restart chronyd
+    service: 
+      name: chronyd
+      state: restarted 
+      enabled: yes
+  when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == "8"
+    
