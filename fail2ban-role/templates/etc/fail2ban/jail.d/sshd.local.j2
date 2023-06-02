@@ -1,0 +1,13 @@
+[sshd]
+enabled = true
+filter = sshd
+action = iptables-allports[name=sshd]
+#mode   = normal
+port    = {{ ansible_ssh_port }}
+logpath = %(sshd_log)s
+backend = %(sshd_backend)s
+bantime = 12h
+findtime = 5m
+maxretry = 10
+
+

@@ -1,0 +1,13 @@
+---
+# # Author: N. Karchevskiy <nikolay.karchevskiy@gmail.com>
+
+- name: Install and configure fail2ban
+  hosts: "{{ w_host | default('test') }}"
+  roles:
+    - role: fail2ban-role
+
+
+
+
+
+

@@ -1,0 +1,8 @@
+# vars file for fail2ban
+---
+fail2ban_ubuntu_package:
+  - fail2ban
+
+fail2ban_centos_package:
+  - fail2ban-server
+  - fail2ban-systemd
