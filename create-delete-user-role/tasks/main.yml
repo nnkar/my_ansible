@@ -1,0 +1,19 @@
+---
+# tasks file for create or delete user role
+
+- name: debug variable users
+  debug: var=login_user
+
+# create user
+- import_tasks: create_user.yml
+  when: delete_user == false
+
+# add sudo for user
+- import_tasks: sudo_enable.yml
+  when: sudo_enable == true and delete_user == false
+
+# delete user
+- import_tasks: delete_user.yml
+  when: delete_user == true
+
+  

@@ -1,0 +1,11 @@
+---
+# vars file for 
+
+#delete_user: false
+#sudo_enable: false
+#add_user: ivan
+#u_passwd: '$TqMr0N11gK5rrDRZE9/ewAYgbNq.bHKvOQcaJziChbnaF3TxxEqDpTxvLx0'
+#full_name: Ivan Ivanov
+#ssh_key: 'ssh-rsa 915h6T2RRYFNNs947eoxSMH1HWbsrF+uzqkN7wsA+j3DlIxiD6KBetyRvLWpDW/GDlj0v7mmP89MVFDBi77Tp2oOTxOtqVneXKlHXIy++F2X+K/97YbX2mBIzJi7BCOoH9kDTuqaBaXNj2QsXgZN2lL3KE4ojxt+IaHjoh3bLiIa5mIcEHXg+3f+lSerpGWiFVF9fHWk67RZSyUtKxWhGJEWxHNC3bL4I3zL2CH312NHTaF9epxsE+uxaGu93HIluCswHV2BjoNWh1Pm28QkCo+LrDrOCOjIr39bh183o+pexqO8AZUn1vVX5LthHkg0ch7115cMur3D5497wATaDQ== sshKey'
+#home_dir: /home/ivan
+#u_shell: /bin/bash
