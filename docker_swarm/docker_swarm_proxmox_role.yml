@@ -1,0 +1,19 @@
+---
+# ansible-playbook docker_swarm_proxmox_role.yml -e w_host=nd1
+- name: create vm container
+  hosts: nd1
+  roles:
+    - role: clone-vm-proxmox-role
+
+- name: install docker to vm
+  hosts: docker-swarm
+  roles:
+    - role: docker_role
+    - role: docker_swarm_role
+
+- name: install portainer
+  hosts: docker-swarm-manager
+  roles:
+    - role: docker_portainer_role
+
+

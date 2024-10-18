@@ -1,0 +1,26 @@
+---
+
+- name: seach line
+  shell: grep "PermitRootLogin" '{{ file_conf }}'
+  register: test_grep
+
+- debug: msg="{{test_grep.stdout}}"
+
+- name: Zamena stroki
+  lineinfile:
+    path: '{{ file_conf }}'
+    regexp: '^[#]?PermitRootLogin [YyNnPp].*$'
+    line: '{{ lineModified }}'
+    backrefs: yes
+  register: akey
+
+- block:
+  - name: Restarting the sshd
+    service: name=sshd state=restarted
+    when: ansible_pkg_mgr == 'yum'
+
+  - name: Restarting the ssh Ubuntu
+    service: name=ssh state=restarted
+    when: ansible_pkg_mgr == 'apt'
+  when: akey.changed
+

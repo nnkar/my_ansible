@@ -1,0 +1,155 @@
+---
+# tasks file for zabbix-agent
+
+- name: "Adding zabbix group"
+  group:
+    name: zabbix
+    state: present
+  become: yes
+
+- name: "Adding zabbix user"
+  user:
+    name: zabbix
+    group: zabbix
+    state: present
+    create_home: False
+    home: /etc/zabbix
+    system: True
+  become: yes
+
+# add Zabbix Official Repository and install zabbix-agent
+- import_tasks: centos.yml
+  when: ansible_distribution == "CentOS"
+# ==============================
+
+- name: Creates directory etc for zabbix
+  file:
+    path: /etc/zabbix/zabbix_agent.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+    recurse: yes
+
+- name: Creates directory scripts for zabbix
+  file:
+    path: /etc/zabbix/scripts
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Creates directory log for zabbix
+  file:
+    path: /var/log/zabbix
+    state: directory
+    owner: zabbix
+    group: zabbix
+    mode: 0755
+
+- name: Creates directory run for zabbix
+  file:
+    path: /var/run/zabbix
+    state: directory
+    owner: zabbix
+    group: zabbix
+    mode: 0755
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^LogFileSize=0'
+    line: 'LogFileSize=256'
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^LogFile=.*$'
+    line: 'LogFile=/var/log/zabbix/zabbix_agentd.log'
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^PidFile=.*$'
+    line: 'PidFile=/var/run/zabbix/zabbix_agentd.pid'
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^# EnableRemoteCommands=0'
+    line: 'EnableRemoteCommands=1'
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^# ListenIP=*$'
+    line: 'ListenIP={{ ansible_ssh_host }}'
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^# SourceIP=*$'
+    line: 'SourceIP={{ ansible_ssh_host }}'
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^Server=127.0.0.1'
+    line: 'Server={{ zabbix_server }}'
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^ServerActive=127.0.0.1'
+    line: 'ServerActive={{ zabbix_server }}'
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^Hostname=Zabbix server'
+    line: 'Hostname={{ ansible_hostname }}'
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^# Timeout=3'
+    line: 'Timeout=30'
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^# BufferSend=5'
+    line: 'BufferSize=100'
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^# MaxLinesPerSecond=20'
+    line: 'MaxLinesPerSecond=100'
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^# HostMetadata='
+    line: '{{ zabbix_HostMetadata }}'
+
+- lineinfile:
+    path: '{{ zabbix_agent_conf }}'
+    regexp: '^Include=/etc/zabbix.*$'
+    line: 'Include=/etc/zabbix/zabbix_agent.conf.d'
+
+- name: copy directory conf
+  copy: 
+    src: zabbix_agent.conf.d
+    dest:  /etc/zabbix/zabbix_agent.conf.d
+
+- name: Copy scripts directory
+  copy: 
+    src: scripts
+    dest: /etc/zabbix/scripts
+
+- name: Chmod +x scripts
+  shell: chmod -R +x /etc/zabbix/scripts
+
+- name: Starting the Zabbix Agent
+  service: 
+    name: '{{ zabbix_agent_service }}' 
+    state: restarted 
+    enabled: yes
+
+- name: add in sudoers
+  lineinfile:
+    dest: /etc/sudoers
+    regexp: '^###$'
+    line: 'zabbix ALL=(ALL) NOPASSWD: /etc/zabbix/scripts/*'
+    insertafter: EOF
+    backup: yes
+      
+

@@ -1,0 +1,54 @@
+---
+  # Установка megacli  для LSI MegaRAID
+- name: ipset sync
+  hosts: "{{ w_host | default('test') }}"
+
+  vars:
+    rpm_pak: 'MegaCli-8.07.06-1.noarch.rpm'
+    dpkg_pak: 'megacli_8.07.06-1_all.deb'
+    remote_file: /etc/ipset/ipset
+    remote_file2: /etc/ipset
+    remote_file_tmp: /tmp/ipset
+
+  tasks:
+    - name: Копирование файдла на хост
+      copy: src=files/'{{ rpm_pak }}' dest=/tmp/'{{ rpm_pak }}' mode=0755
+      when: ansible_distribution == "CentOS"
+
+    - name: Install MegaCli Centos
+      yum:
+        name: /tmp/'{{ rpm_pak }}'
+        state: present
+      when: ansible_distribution == "CentOS"
+
+    - name: Install ncurses-devel, libncurses5 Centos
+      yum:
+        name: ncurses-devel
+        state: present
+      when: ansible_distribution == "CentOS"
+
+    - name: Копирование файдла на хост
+      copy: src=files/'{{ dpkg_pak }}' dest=/tmp/'{{ dpkg_pak }}' mode=0755
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install MegaCli Ubuntu
+      apt:
+        deb: /tmp/'{{ dpkg_pak }}'
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install libncurses5 Ubuntu
+      apt:
+        name: libncurses5
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Symlink
+      ansible.builtin.file::
+        src: /opt/MegaRAID/MegaCli/MegaCli64
+        dst: /usr/sbin/megacli
+        state: link
+
+    - name: test
+      shell: "which megacli && megacli -AdpAllInfo -aAll"
+

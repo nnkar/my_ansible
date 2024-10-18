@@ -1,0 +1,32 @@
+---
+- name: create volume directory
+  file: path={{item}} state=directory recurse=yes
+  with_items: '{{ docker_directory_create }}'
+
+- name: Create ssl certificate
+  shell: openssl req -new -x509 -days 1461 -nodes -out {{docker_container_ssl_dir}}/public.pem -keyout {{docker_container_ssl_dir}}/private.key -subj "{{ docker_container_subj_ssl }}"
+
+- name: Create auth user
+  shell: htpasswd -Bbn '{{ docker_user }}' '{{ docker_user_password }}' > '{{ docker_container_auth_dir }}'/htpasswd
+
+- name: Remove image
+  docker_image:
+    state: absent
+    name: "{{ docker_image }}:{{ docker_container_version }}"
+
+- name: pull an image 
+  docker_image:
+    name: "{{ docker_image }}:{{ docker_container_version }}"
+    source: pull
+    timeout: 300
+
+- name: container create.
+  docker_container:
+    name: '{{ docker_container_name }}'
+    image: '{{ docker_image }}:{{ docker_container_version }}'
+    restart_policy: '{{docker_container_restart_policy}}'
+    volumes: '{{ docker_container_volumes }}'
+    ports: '{{ docker_container_ports }}'
+    env: '{{ docker_envs }}'
+
+

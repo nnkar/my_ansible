@@ -1,0 +1,47 @@
+---
+- name: uninstall firewalld
+  yum: 
+    name: '{{ remove_soft }}' 
+    state: absent
+
+- name: Install soft Centos
+  yum: 
+    name: '{{ install_soft_centos }}' 
+    state: present
+
+- name: Starting and enabled iptables
+  service: 
+    name: iptables 
+    state: started 
+    enabled: yes
+
+- name: Starting and enabled ipset
+  service: 
+    name: ipset 
+    state: started 
+    enabled: yes
+
+- name: rsyslog nastroika
+  lineinfile:
+    path: /etc/rsyslog.conf
+    insertafter: "^#### RULES ####"
+    line: "{{ item }}"
+    create: yes
+  with_items:
+    - '& ~'
+    - ':msg, startswith, "iptables: " /var/log/iptables/iptables.log'
+
+- lineinfile:
+    path: /etc/sysconfig/ipset-config
+    regexp: '^IPSET_SAVE_ON_STOP="no"'
+    line: 'IPSET_SAVE_ON_STOP="yes"'
+
+- lineinfile:
+    path: /usr/lib/systemd/system/ipset.service
+    regexp: '^Environment=IPSET_SAVE_ON_STOP=no'
+    line: 'Environment=IPSET_SAVE_ON_STOP=yes'
+
+- lineinfile:
+    path: /etc/sysconfig/iptables-config
+    regexp: '^IPTABLES_SAVE_ON_STOP="no"'
+    line: 'IPTABLES_SAVE_ON_STOP="yes"'

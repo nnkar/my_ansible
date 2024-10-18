@@ -1,0 +1,6 @@
+---
+# tasks file for docker_swarm_role
+
+- include: docker_portainer_role.yml
+  with_items: "{{ groups['docker-swarm-manager'] }}"
+

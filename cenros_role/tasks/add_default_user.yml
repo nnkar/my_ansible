@@ -1,0 +1,46 @@
+---
+
+- local_action: python3 -c 'import crypt; print(crypt.crypt("{{ user_password }}", crypt.mksalt(crypt.METHOD_SHA512)))'
+  register: u_passwd
+
+
+- name: Add group for user "{{ user_name }}"
+  group:
+    name: '{{ user_name }}'
+    state: present
+
+- name: Add user - "{{ user_name }}"
+  user:
+    name: '{{ user_name }}'
+    password: '{{ u_passwd }}'
+    groups: '{{ user_name }}'
+    comment: '{{ user_comment }}'
+    state: present
+    shell: '{{ user_shell }}'
+    system: no
+    createhome: yes
+    home: '{{ user_home | default(/home/{{ user_name }}) }}'
+
+- block:
+  - name: Creates ssh  directory
+    file:
+      path: /home/{{ user_name }}/.ssh
+      state: directory
+      owner: '{{ user_name }}'
+      group: '{{ user_name }}'
+      mode: 0700
+
+  - name: create file authorized_keys
+    file:
+      path: /home/{{ user_name }}/.ssh/authorized_keys
+      state: touch
+      owner: '{{ user_name }}'
+      group: '{{ user_name }}'
+      mode: 0600
+    ignore_errors: True
+
+  - lineinfile:
+      path: /home/{{ user_name }}/.ssh/authorized_keys
+      line: '{{ user_ssh_key }}'
+      create: no
+  when: 'user_ssh_key != None' 

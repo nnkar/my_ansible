@@ -1,0 +1,18 @@
+---
+# vars file for docker_portainer_role
+
+#docker_portainer_version: "1.11.3"
+docker_portainer_version: "latest"
+docker_portainer_container_name: "portainer"
+docker_portainer_image: "portainer/portainer"
+docker_portainer_container_volume_base: "/opt/docker"
+docker_portainer_port: "9000"
+docker_portainer_initial_database_file: ""
+docker_portainer_pull: "yes"
+docker_portainer_state: "started"
+docker_portainer_restart_policy: "on-failure"
+
+
+
+
+

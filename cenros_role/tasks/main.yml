@@ -1,0 +1,25 @@
+---
+# tasks file for centos_role
+
+- include: install_soft.yml
+
+- name: install ntp
+  include: ntp-client.yml
+
+- name: ssh root only key
+  include: ssh-root-key-only.yml
+
+- name: add default user
+  include: add_default_user.yml
+
+- name: add user in sudoers
+  include: sudoers-users.yml
+
+- name: install zabbix-agent
+  include: zabbix-agent.yml
+
+- name: IPTABLES settings
+  include: iptables.yml
+
+
+

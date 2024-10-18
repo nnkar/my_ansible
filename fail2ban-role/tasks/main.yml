@@ -1,0 +1,122 @@
+# tasks file for fail2ban
+---
+- name: install for Centos 7
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ fail2ban_centos_package }}"
+  when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == "7"
+
+- name: install Ubuntu
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ fail2ban_ubuntu_package }}"
+  when: ansible_distribution == 'Ubuntu' or ansible_distribution == 'Debian'
+
+- name: update configuration file - /etc/fail2ban/fail2ban.local
+  template:
+    src: etc/fail2ban/fail2ban.local.j2
+    dest: /etc/fail2ban/fail2ban.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  notify: restart fail2ban
+  tags:
+    - configuration
+    - fail2ban
+    - fail2ban-configuration
+
+- name: update configuration file - /etc/fail2ban/jail.local
+  template:
+    src: etc/fail2ban/jail.local.j2
+    dest: /etc/fail2ban/jail.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  notify: restart fail2ban
+  tags:
+    - configuration
+    - fail2ban
+    - fail2ban-configuration
+
+- name: copy filters
+  copy:
+    src: "{{ fail2ban_filterd_path }}"
+    dest: /etc/fail2ban/filter.d/
+    owner: root
+    group: root
+    mode: 0644
+  when: fail2ban_filterd_path is defined
+  notify: restart fail2ban
+  tags:
+    - configuration
+    - fail2ban
+    - fail2ban-filters
+
+- name: copy actions
+  copy:
+    src: "{{ fail2ban_actiond_path }}"
+    dest: /etc/fail2ban/action.d/
+    owner: root
+    group: root
+    mode: 0644
+  when: fail2ban_actiond_path is defined
+  notify: restart fail2ban
+  tags:
+    - configuration
+    - fail2ban
+    - fail2ban-actions
+
+- name: copy jails
+  copy:
+    src: "{{ fail2ban_jaild_path }}"
+    dest: /etc/fail2ban/jail.d/
+    owner: root
+    group: root
+    mode: 0644
+  when: fail2ban_jaild_path is defined
+  notify: restart fail2ban
+  tags:
+    - configuration
+    - fail2ban
+    - fail2ban-jails
+
+- name: copy jail sshd template
+  template:
+    src: etc/fail2ban/jail.d/sshd.local.j2
+    dest: /etc/fail2ban/jail.d/sshd.local
+    owner: root
+    group: root
+    mode: 0644
+  when: fail2ban_jaild_path is defined
+  notify: restart fail2ban
+  tags:
+    - configuration
+    - fail2ban
+    - fail2ban-jails
+
+- name: start and enable service
+  systemd:
+    name: fail2ban
+    state: started
+    enabled: true
+  tags:
+    - configuration
+    - fail2ban
+    - fail2ban-start-enable-service
+  when: ansible_service_mgr == 'systemd'
+
+
+- name: start and enable service
+  service:
+    name: fail2ban
+    state: started
+    enabled: true
+  tags:
+    - configuration
+    - fail2ban
+    - fail2ban-start-enable-service
+  when: ansible_service_mgr != 'systemd'

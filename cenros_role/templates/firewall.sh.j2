@@ -346,7 +346,7 @@ echo "END BLACKLIST"
     $IPT -N icmp_in
     $IPT -F icmp_in
     $IPT -A icmp_in -p icmp -m state --state ESTABLISHED -j ACCEPT $RLIMIT
-    $IPT -A icmp_in -p icmp -m state --state RELATED -j ACCEPT $RLIMIT
+    $IPT -A icmp_in -p icmp -m state --state RELATED -j RELATED_ICMP $RLIMIT
     $IPT -A icmp_in -p icmp -f -j DROP
     $IPT -A icmp_in -p icmp -m limit --limit 1/s --limit-burst 2 -j ACCEPT
     $IPT -A icmp_in -p icmp -m limit --limit 1/s --limit-burst 2 -j LOG --log-prefix "iptables: Ping DROP: "

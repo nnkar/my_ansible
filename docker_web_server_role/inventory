@@ -1,0 +1,22 @@
+
+dmaster1 ansible_ssh_port=22 ansible_ssh_host=192.168.223.130
+dmaster2 ansible_ssh_port=22 ansible_ssh_host=192.168.223.131
+dworker1 ansible_ssh_port=22 ansible_ssh_host=192.168.223.132
+dworker2 ansible_ssh_port=22 ansible_ssh_host=192.168.223.133
+dworker3 ansible_ssh_port=22 ansible_ssh_host=192.168.223.134
+
+[docker-swarm-manager]
+dmaster1
+
+[docker-swarm-managers]
+dmaster2
+
+[docker-swarm-workers]
+dworker1
+dworker2
+dworker3
+
+[docker-swarm:children]
+docker-swarm-manager
+docker-swarm-managers
+docker-swarm-workers

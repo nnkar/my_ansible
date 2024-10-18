@@ -1,0 +1,17 @@
+---
+- name: Check if Swarm is Already Initialized
+  shell: docker node ls
+  register: swarm_status
+  ignore_errors: true
+  tags: swarm
+
+- local_action: shell cat "/tmp/manager_token"
+  register: manager_token
+
+- local_action: shell cat "/tmp/docker_swarm_man_ip"
+  register: docker_swarm_man_ip
+
+- name: Add Managers to the Swarm
+  shell: "docker swarm join --token {{ manager_token.stdout }} {{ docker_swarm_man_ip.stdout }}:2377"
+  when: swarm_status.rc != 0
+  tags: swarm

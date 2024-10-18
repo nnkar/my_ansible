@@ -1,0 +1,16 @@
+---
+- name: Role create or delete user
+  hosts: "{{ w_host | default('test') }}"
+
+# вызывать заклинанием
+# ansible-playbook create-delete-user-role.yml -e login_user=user -e w_host=name_server
+#
+  vars_files: 
+    - "users/{{ login_user }}"
+
+  roles:
+    - role: create-delete-user-role
+
+
+
+

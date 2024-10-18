@@ -1,0 +1,17 @@
+---
+- name: Add group for user wheel
+  user:
+    name: '{{ login_user }}'
+    groups: wheel
+    append: yes
+  ignore_errors: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'AlmaLinux' or ansible_distribution == 'OracleLinux'
+
+- name: Add group for user sudo
+  user:
+    name: '{{ login_user }}'
+    groups: sudo
+    append: yes
+  ignore_errors: true
+  when: ansible_distribution == 'Ubuntu' or ansible_distribution == 'Debian'
+

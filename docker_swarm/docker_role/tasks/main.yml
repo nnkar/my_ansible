@@ -1,0 +1,11 @@
+---
+# tasks file for docker_role
+- name: Wait 60 sec for port ssh to become open and contain "OpenSSH"
+  wait_for:
+    port: '{{ ansible_ssh_port | default("22") }}'
+    host: '{{ (ansible_ssh_host | default(ansible_host)) | default(inventory_hostname) }}'
+    search_regex: OpenSSH
+    delay: 60
+  connection: local
+
+- import_tasks: docker_install.yml

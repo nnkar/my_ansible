@@ -1,0 +1,49 @@
+---
+# vars file for docker_registry_role
+
+# на каждом компьютере, который должен обращаться к общему репозиторию Docker, открываем файл:
+# vi /etc/docker/daemon.json
+# и добавляем
+# {
+#     "insecure-registries" : ["repo.docker.local:5000"]
+# }
+
+docker_container_version: "latest"
+docker_container_name: "registry"
+docker_container_subj_ssl: "/C=RU/ST=SPb/L=SPb/O=Global Security/OU=IT Department/CN=repo.docker.local"
+docker_image: "registry"
+docker_image_pull: "yes"
+
+docker_user: "testuser"
+docker_user_password: "P@ssworsd"
+
+docker_container_ports: 
+  - "5000:5000"
+
+docker_container_state: "started"
+docker_container_restart_policy: "always"
+
+docker_container_volume_base: "/opt/docker/{{docker_container_name}}"
+docker_container_ssl_dir: "/etc/ssl/{{ docker_container_name }}"
+docker_container_auth_dir: "/etc/docker/{{ docker_container_name }}/auth"
+
+docker_directory_create:
+  - "{{ docker_container_volume_base }}"
+  - "{{ docker_container_ssl_dir }}"
+  - "{{ docker_container_auth_dir }}"
+
+docker_container_volumes: 
+  - "{{ docker_container_volume_base }}:/var/lib/registry"
+  - "{{ docker_container_ssl_dir }}:/certs"
+  - "{{ docker_container_auth_dir }}:/auth"
+
+docker_envs:
+  REGISTRY_HTTP_TLS_CERTIFICATE: "/certs/public.pem"
+  REGISTRY_HTTP_TLS_KEY: "/certs/private.key"
+  REGISTRY_AUTH: "htpasswd"
+  REGISTRY_AUTH_HTPASSWD_PATH: "/auth/htpasswd"
+  REGISTRY_AUTH_HTPASSWD_REALM: "Registry Realm"
+
+
+
+

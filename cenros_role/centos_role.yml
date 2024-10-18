@@ -1,0 +1,5 @@
+---
+- name: Первоначальная настройка CentOS
+  hosts: "{{ w_host | default('test') }}"
+  roles:
+    - role: centos_role

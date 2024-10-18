@@ -1,0 +1,46 @@
+---
+
+- name: Add group for user
+  group:
+    name: '{{ login_user }}'
+    state: present
+  ignore_errors: true
+
+- name: Add user
+  user:
+    name: '{{ login_user }}'
+    password: '{{ u_passwd }}'
+    group: '{{ login_user }}'
+    comment: '{{ full_name }}'
+    state: present
+    shell: '{{ u_shell }}'
+    system: no
+    createhome: yes
+    home: '{{ home_dir }}'
+
+- name: delete file
+  file:
+    path: '{{ home_dir }}/.ssh/authorized_keys'
+    state: absent
+
+- name: Creates directory log for authorized_keys
+  file:
+    path: '{{ home_dir }}/.ssh'
+    state: directory
+    owner: '{{ login_user }}'
+    group: '{{ login_user }}'
+    mode: 0700
+
+- name: create file authorized_keys
+  file:
+    path: '{{ home_dir }}/.ssh/authorized_keys'
+    state: touch
+    owner: '{{ login_user }}'
+    group: '{{ login_user }}'
+    mode: 0600
+  ignore_errors: True
+
+- lineinfile:
+    path: '{{ home_dir }}/.ssh/authorized_keys'
+    line: '{{ ssh_key }}'
+    create: yes
