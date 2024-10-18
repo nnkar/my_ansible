@@ -1,0 +1,20 @@
+---
+# disable sudo
+
+- name: Del group for user wheel
+  ansible.builtin.command:
+    cmd: gpasswd -d '{{ login_user }}' wheel
+  ignore_errors: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'AlmaLinux' or ansible_distribution == 'OracleLinux'
+
+- name: Del group for user sudo
+  ansible.builtin.command:
+    cmd: gpasswd -d '{{ login_user }}' sudo
+  ignore_errors: true
+  when: ansible_distribution == 'Ubuntu' or ansible_distribution == 'Debian'
+
+- name: Remove file for {{ login_user }} user
+  ansible.builtin.file:
+    path: "/etc/sudoers.d/80-ansible-sudo-{{ login_user }}"
+    state: absent
+  when: sudo_without_pass

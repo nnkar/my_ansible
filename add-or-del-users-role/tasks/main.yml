@@ -1,0 +1,32 @@
+---
+# tasks file for create or delete user role
+
+- name: Debug variable users
+  ansible.builtin.debug:
+     msg: "Host: {{ inventory_hostname  }} and user: {{ login_user }}"
+
+- name: Create user block
+  when: inventory_hostname != "vpnhost"
+  block:
+    - name: Create user
+      ansible.builtin.import_tasks: create_user.yml
+      when: not delete_user
+
+    - name: Add sudo for user
+      ansible.builtin.include_tasks: sudo_enable.yml
+      when: sudo_enable and not delete_user
+
+- name: Delete sudo for user
+  ansible.builtin.include_tasks: sudo_disable.yml
+  when: not sudo_enable and not delete_user
+
+- name: Delete user
+  ansible.builtin.include_tasks: delete_user.yml
+  when: delete_user
+
+- name: Enable vpn for user block
+  when: vpn_enable and inventory_hostname == "vpnhost"
+  block:
+    - name: Enable vpn for user
+      ansible.builtin.include_tasks: vpn_enable.yml
+

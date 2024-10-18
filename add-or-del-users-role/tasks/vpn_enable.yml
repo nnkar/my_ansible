@@ -1,0 +1,15 @@
+---
+- name: Debug variable w_host
+  ansible.builtin.debug:
+    msg: "Host vpn =====: {{ inventory_hostname }}"
+
+
+- name: Add user
+  ansible.builtin.user:
+    name: '{{ login_user }}'
+    password: '{{ u_passwd }}'
+    comment: '{{ full_name }} for vpn'
+    state: present
+    shell: '/usr/sbin/nologin'
+    system: false
+    createhome: false

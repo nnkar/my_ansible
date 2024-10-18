@@ -1,0 +1,57 @@
+---
+
+- name: Add group for user
+  ansible.builtin.group:
+    name: '{{ login_user }}'
+    state: present
+  ignore_errors: true
+
+- name: Add user
+  ansible.builtin.user:
+    name: '{{ login_user }}'
+    password: '{{ u_passwd }}'
+    group: '{{ login_user }}'
+    groups: '{{ u_groups | default("cdrom") }}'
+    comment: '{{ full_name }}'
+    state: present
+    shell: '{{ u_shell }}'
+    system: false
+    createhome: true
+    home: '{{ home_dir }}'
+
+- name: Delete file
+  ansible.builtin.file:
+    path: '{{ home_dir }}/.ssh/authorized_keys'
+    state: absent
+
+- name: Creates directory log for authorized_keys
+  ansible.builtin.file:
+    path: '{{ home_dir }}/.ssh'
+    state: directory
+    owner: '{{ login_user }}'
+    group: '{{ login_user }}'
+    mode: "0700"
+
+- name: Create file authorized keys
+  ansible.builtin.file:
+    path: '{{ home_dir }}/.ssh/authorized_keys'
+    state: touch
+    owner: '{{ login_user }}'
+    group: '{{ login_user }}'
+    mode: "0600"
+  ignore_errors: true
+
+- name: Add key in file authorized keys
+  ansible.builtin.lineinfile:
+    path: '{{ home_dir }}/.ssh/authorized_keys'
+    line: '{{ item }}'
+    create: true
+  loop: '{{ ssh_key }}'
+
+- name: Edit folder permissions
+  ansible.builtin.file:
+    path: '{{ home_dir }}'
+    owner: '{{ login_user }}'
+    group: '{{ login_user }}'
+    recurse: true
+

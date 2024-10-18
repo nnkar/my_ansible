@@ -1,0 +1,31 @@
+---
+# delete user
+
+- name: Kill all process by user
+  ansible.builtin.shell: pgrep -U {{ login_user }}|xargs kill -9
+  ignore_errors: true
+
+- name: Delete users
+  ansible.builtin.user:
+    name: '{{ login_user }}'
+    state: absent
+    remove: true
+
+- name: Delete group
+  ansible.builtin.group:
+    name: '{{ login_user }}'
+    state: absent
+
+- name: Disable sudo user
+  ansible.builtin.lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^{{ login_user }}'
+    line: ''
+    validate: visudo -cf %s
+
+- name: Del file sudoers.d
+  ansible.builtin.file:
+    dest: "/etc/sudoers.d/80-ansible-sudo-{{ login_user }}"
+    state: absent
+  ignore_errors: true

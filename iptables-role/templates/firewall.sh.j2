@@ -154,7 +154,14 @@ echo "20000" > /proc/sys/net/core/somaxconn
 # запрещаем 1 ipv6 или разрешаем 0
 echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6
 
-
+#################################################################################################
+# СОХРАНЕНИЕ перед очисткой
+#################################################################################################
+fn_date_time
+iptables-save > /root/iptables-save-${DATE}-${TIME}.txt
+iptables-save -t nat > /root/iptables-save-nat-${DATE}-${TIME}.txt
+ip6tables-save > /root/iptables6-save-${DATE}-${TIME}.txt
+ipset save > /root/ipset-save-${DATE}-${TIME}.txt
 
 #################################################################################################
 # очищаем и задаем политики по умолчанию
@@ -232,6 +239,25 @@ fi
 # НАЧАЛО СОЗДАЕМ ЦЕПОЧКИ ПРАВИЛ
 #################################################################################################
 # Создание и очистка цепочек
+# Docker цепочки
+   $IPT -N DOCKER
+   $IPT -N DOCKER-ISOLATION-STAGE-1
+   $IPT -N DOCKER-ISOLATION-STAGE-2
+   $IPT -N DOCKER-USER
+   $IPT -t nat -N DOCKER
+
+   $IPT -A FORWARD -j DOCKER-USER
+   $IPT -A FORWARD -j DOCKER-ISOLATION-STAGE-1
+   $IPT -A FORWARD -o docker0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+   $IPT -A FORWARD -o docker0 -j DOCKER
+   $IPT -A FORWARD -i docker0 ! -o docker0 -j ACCEPT
+   $IPT -A FORWARD -i docker0 -o docker0 -j ACCEPT
+
+   $IPT -A DOCKER-ISOLATION-STAGE-1 -i docker0 ! -o docker0 -j DOCKER-ISOLATION-STAGE-2
+   $IPT -A DOCKER-ISOLATION-STAGE-1 -j RETURN
+   $IPT -A DOCKER-ISOLATION-STAGE-2 -o docker0 -j DROP
+   $IPT -A DOCKER-ISOLATION-STAGE-2 -j RETURN
+   $IPT -A DOCKER-USER -j RETURN
 
 # Цепочки для проверки пакетов #
    $IPT -N check_packets
@@ -532,7 +558,7 @@ echo "END FORWARD"
 # Используйте REJECT вместо REJECTLOG, если вам не нужно / не нужно вести журнал.
 
 #################################################################################################
-# СОХРАНЕНИЕ И ОТПРАВКА ОТЧЕТА ПО ПОЧТЕ
+# СОХРАНЕНИЕ 
 #################################################################################################
 #Сохраняем iptables centos
 {% if ansible_distribution  == 'CentOS' %}
@@ -553,7 +579,6 @@ ipset save > /etc/iptables/ipsets
 # можно в /etc/network/interfaces добавить после интерфейса
 #post-up /sbin/iptables-restore < /etc/iptables/iptables
 #post-up /sbin/ipset restore < /etc/iptables/ipsets
-
 
 # сохраняем результат 
 iptables -L -v -n --line-number > /scripts/ipt.txt

@@ -1,0 +1,23 @@
+---
+- name: Add group for user wheel
+  ansible.builtin.user:
+    name: '{{ login_user }}'
+    groups: wheel
+    append: true
+  ignore_errors: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'AlmaLinux' or ansible_distribution == 'OracleLinux'
+
+- name: Add group for user sudo
+  ansible.builtin.user:
+    name: '{{ login_user }}'
+    groups: sudo
+    append: true
+  ignore_errors: true
+  when: ansible_distribution == 'Ubuntu' or ansible_distribution == 'Debian'
+
+- name: Make sudo without password for {{ login_user }} user
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/80-ansible-sudo-{{ login_user }}"
+    content: "{{ login_user }} ALL=(ALL) NOPASSWD:ALL"
+    mode: "0440"
+  when: sudo_without_pass

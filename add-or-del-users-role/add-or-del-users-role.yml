@@ -1,0 +1,9 @@
+---
+- name: Role create or delete user
+  hosts: "{{ w_host | default('test') }}"
+
+  vars_files:
+    - "users/{{ login_user }}"
+
+  roles:
+    - role: add-or-del-users-role
